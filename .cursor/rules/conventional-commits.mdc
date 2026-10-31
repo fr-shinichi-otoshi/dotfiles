@@ -1,0 +1,14 @@
+---
+description: git コミット作成・コミットメッセージ作成時に Conventional Commits を適用する
+alwaysApply: false
+---
+
+# Conventional Commits（要約）
+
+コミット前に `.agent/conventional-commits.md` を読み、その内容に従うこと。
+
+- 形式: `<type>[optional scope][!]: <description>`
+- `feat` / `fix` 必須用途。他は `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+- description / body は日本語。キーワード（type 等）は英語
+- description 末尾に句点やピリオドを付けない
+- 破壊的変更は `!` または `BREAKING CHANGE:` フッター
