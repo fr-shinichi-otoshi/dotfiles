@@ -1,0 +1,14 @@
+# ユーザーローカルのバイナリを PATH に載せる
+typeset -U path PATH
+path=(
+  "${HOME}/.local/bin"
+  $path
+)
+export PATH
+
+# Node.js ほか開発ツールのバージョン管理（mise）
+# .zshenv は非対話シェルでも読まれるため、Cursor Agent 等でもツールが PATH に載る
+# activate: 対話シェルでの cd 時に mise.toml / .node-version / .nvmrc へ追従
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi

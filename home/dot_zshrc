@@ -1,0 +1,93 @@
+# ヒストリー（未設定だと SAVEHIST=0 でセッション終了時に破棄される）
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+# 複数セッション間で履歴を共有・即時反映
+setopt SHARE_HISTORY
+# 実行時刻も記録
+setopt EXTENDED_HISTORY
+# 直前と同じコマンドは記録しない
+setopt HIST_IGNORE_DUPS
+# 履歴全体の重複を捨てる
+setopt HIST_IGNORE_ALL_DUPS
+# 履歴検索で重複をスキップ
+setopt HIST_FIND_NO_DUPS
+# 先頭スペースのコマンドは記録しない
+setopt HIST_IGNORE_SPACE
+# 余分な空白を詰める
+setopt HIST_REDUCE_BLANKS
+# !! などを実行前に表示して確認
+setopt HIST_VERIFY
+
+# ディレクトリ
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt PUSHD_SILENT
+
+# 快適さ
+setopt INTERACTIVE_COMMENTS
+setopt NO_BEEP
+setopt EXTENDED_GLOB
+setopt GLOB_DOTS
+
+# 補完の見た目・大小無視（compinit / fzf-tab より前に設定）
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' menu select
+
+# ディレクトリスタック
+alias d='dirs -v'
+for index ({1..9}) alias "$index"="cd +${index}"
+unset index
+
+# エイリアス読込 + sheldon プラグイン（キャッシュ / zcompile）
+() {
+  # ソースが .zwc より新しければ再コンパイルする
+  zcompile_if_needed() {
+    [[ -s $1 && (! -s $1.zwc || $1 -nt $1.zwc) ]] && zcompile -R -- "$1"
+  }
+
+  source "${HOME}/.zsh_aliases"
+  zcompile_if_needed "${HOME}/.zsh_aliases"
+
+  # sheldon source の結果をキャッシュし、起動のたびに sheldon を動かさない
+  local cache="${XDG_CACHE_HOME:-$HOME/.cache}/sheldon/sheldon.zsh"
+  local toml="${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.toml"
+  local lock="${XDG_DATA_HOME:-$HOME/.local/share}/sheldon/plugins.lock"
+  # plugins.toml / plugins.lock が更新されていたらキャッシュを再生成
+  if [[ ! -s $cache || (-f $toml && $toml -nt $cache) || (-f $lock && $lock -nt $cache) ]]; then
+    mkdir -p "${cache:h}"
+    sheldon source >| "$cache"
+    zcompile -R -- "$cache"
+  fi
+  source "$cache"
+}
+
+# less: ANSI カラー表示 + lesspipe（導入済みなら）
+export LESS='-R'
+command -v lesspipe >/dev/null 2>&1 && eval "$(lesspipe)"
+
+# fzf のキーバインド / 補完（fzf-tab 本体は sheldon 側で読込）
+source <(fzf --zsh)
+
+# fzf のファイル列挙に fd を使う
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="${FZF_DEFAULT_COMMAND}"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:500 {} 2>/dev/null || cat {}'"
+
+# プロンプト（Starship）
+eval "$(starship init zsh)"
+
+# broot（終了時に cwd を移す br 関数を定義）
+eval "$(broot --print-shell-function zsh)"
+
+# atuin（Ctrl-R を上書きするため fzf より後）
+eval "$(atuin init zsh)"
+
+# この .zshrc 自体を、更新時だけ zcompile する
+() {
+  local zshrc="${ZDOTDIR:-$HOME}/.zshrc"
+  [[ -s $zshrc && (! -s ${zshrc}.zwc || $zshrc -nt ${zshrc}.zwc) ]] && zcompile -R -- "$zshrc"
+}

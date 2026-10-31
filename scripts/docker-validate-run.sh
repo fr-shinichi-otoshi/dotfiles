@@ -26,6 +26,7 @@ cd "${HOME}/dotfiles-work"
 chezmoi init --source="${PWD}"
 chezmoi apply --source="${PWD}"
 test -f "${HOME}/.config/mise/config.toml"
+test -f "${HOME}/.zshrc"
 echo mise_config_ok
 
 bash bootstrap.sh
@@ -35,6 +36,8 @@ echo bootstrap_first_ok
 source "${HOME}/.bashrc" || true
 eval "$("${HOME}/.local/bin/mise" activate bash)"
 
+getent passwd "${USER}" | cut -d: -f7 | grep -qx /usr/bin/zsh
+
 git --version
 git-lfs --version
 mise --version
@@ -42,6 +45,29 @@ chezmoi --version
 gh --version
 sops --version
 age --version
+fzf --version
+rg --version
+fd --version
+eza --version
+sheldon --version
+starship --version
+atuin --version
+lazygit --version
+lefthook version
+node --version
+uv --version
+terraform version
+tflint --version
+terraform-docs --version
+broot --version
+gping --version
+rga --version
+lazydocker --version
+herdr --version
+hunk --version
+docker --version
+sudo docker version
+sudo docker run --rm hello-world
 chezmoi diff --source="${HOME}/dotfiles-work"
 echo tools_ok
 

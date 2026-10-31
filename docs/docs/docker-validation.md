@@ -85,9 +85,9 @@ docker exec -u developer -w /home/developer \
 1. 検証用の`~/.config/chezmoi/chezmoi.toml`を作成する。
 2. `sudo snap install chezmoi --classic`でchezmoiを導入する。
 3. Dockerでは一般ユーザーがsnap実行できない場合があるため、`/snap/chezmoi/current/chezmoi`を`/usr/local/bin/chezmoi`へコピーする。
-4. `chezmoi init` / `chezmoi apply`で`~/.config/mise/config.toml`を配置する。
-5. `bash bootstrap.sh`を初回実行する。
-6. 各ツールのバージョンと`chezmoi diff`を確認する。
+4. `chezmoi init` / `chezmoi apply`でmise設定とzsh設定を配置する。
+5. `bash bootstrap.sh`を初回実行する（apt / Docker Engine / mise / chsh / sheldon）。
+6. ログインシェルが`/usr/bin/zsh`であること、主要CLIのバージョン、`docker version`、`hello-world`、`chezmoi diff`を確認する。
 7. `bash bootstrap.sh`を再実行する。
 8. `ssh -T git@github.com`で認証する（`successfully authenticated`があれば合格。終了コードは1になりうる）。
 
@@ -95,13 +95,15 @@ docker exec -u developer -w /home/developer \
 
 ## 合格条件
 
-- [x] snapでchezmoiを導入し、`chezmoi apply`で`~/.config/mise/config.toml`が配置される。
-- [x] 初回の`bootstrap.sh`が一般ユーザーで完了する。
-- [x] 新しいシェルから`git` / `git-lfs` / `mise` / `chezmoi` / `gh` / `sops` / `age`を起動できる。
-- [x] `chezmoi diff`に意図しない差分が残らない。
-- [x] `bootstrap.sh`の再実行が致命的に失敗しない。
-- [x] マウントしたSSH鍵で`ssh -T git@github.com`が成功する。
-- [ ] 新しいコンテナでも同じ手順で初回構築を再現できる（必要なら再実行して確認する）。
+- [ ] snapでchezmoiを導入し、`chezmoi apply`で`~/.config/mise/config.toml`と`.zshrc`が配置される。
+- [ ] 初回の`bootstrap.sh`が一般ユーザーで完了する。
+- [ ] ログインシェルが`/usr/bin/zsh`になる。
+- [ ] 主要CLI（既存・シェル・Git・ランタイム・P4・herdr / hunk）と`docker`が起動できる。
+- [ ] `sudo docker run --rm hello-world`が成功する。
+- [ ] `chezmoi diff`に意図しない差分が残らない。
+- [ ] `bootstrap.sh`の再実行が致命的に失敗しない。
+- [ ] マウントしたSSH鍵で`ssh -T git@github.com`が成功する。
+- [ ] 新しいコンテナでも同じ手順で初回構築を再現できる。
 
 ## 終了・再検証
 

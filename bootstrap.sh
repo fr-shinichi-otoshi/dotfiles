@@ -2,7 +2,7 @@
 #
 # プロビジョニング入口。
 # 前提: snap の chezmoi で home/ を適用済みであること。
-# mitamae で apt / mise / CLI を導入する。
+# mitamae で apt / Docker Engine / mise / CLI / ログインシェルを導入し、sheldon を更新する。
 #
 
 set -Eeuo pipefail
@@ -115,6 +115,16 @@ refresh_mise() {
   "${MISE_BIN}" install
 }
 
+refresh_sheldon() {
+  if ! command -v sheldon >/dev/null 2>&1; then
+    log "sheldon が無いためプラグイン更新をスキップする"
+    return 0
+  fi
+  log "sheldon プラグインを更新する"
+  sheldon lock --update
+  rm -f "${XDG_CACHE_HOME:-${HOME}/.cache}/sheldon/sheldon.zsh"{,.zwc}
+}
+
 main() {
   [[ "$(id -u)" -ne 0 ]] || error "root では実行しない。一般ユーザーで bash bootstrap.sh を実行する"
   [[ -f "${ROOT_DIR}/.chezmoiroot" ]] || error "${ROOT_DIR} は dotfiles リポジトリではない"
@@ -124,8 +134,9 @@ main() {
   run_mitamae
   activate_mise
   refresh_mise
+  refresh_sheldon
 
-  log "完了。新しいターミナルを開き、導入結果を確認する"
+  log "完了。新しいターミナルを開くか exec zsh し、導入結果を確認する"
 }
 
 main "$@"

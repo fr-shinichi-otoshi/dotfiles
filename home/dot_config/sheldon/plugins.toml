@@ -1,0 +1,67 @@
+shell = "zsh"
+
+# fpath のみ追加し、compinit より前に置く
+[plugins.zsh-completions]
+github = "zsh-users/zsh-completions"
+apply = ["fpath"]
+
+# CLI 補完を生成して fpath に載せる（インストール済みのものだけ・compinit より前）
+# fzf は .zshrc の `source <(fzf --zsh)` で扱う。
+[plugins.cli-completions]
+inline = """
+() {
+  local _dir="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions"
+  local _dump="${ZDOTDIR:-$HOME}/.zcompdump"
+  local _comp _have=0 _stale=0
+
+  # $1=コマンド名 $2=補完ファイル名 残り=生成コマンド
+  _gen_comp() {
+    local cmd=$1 name=$2
+    shift 2
+    (( $+commands[$cmd] )) || return 0
+    mkdir -p "$_dir"
+    if [[ ! -s "$_dir/$name" || ${commands[$cmd]} -nt "$_dir/$name" ]]; then
+      "$@" >| "$_dir/$name"
+    fi
+  }
+
+  _gen_comp chezmoi _chezmoi chezmoi completion zsh
+  _gen_comp mise _mise mise completion zsh
+  _gen_comp starship _starship starship completions zsh
+  _gen_comp atuin _atuin atuin gen-completions --shell zsh
+  _gen_comp sheldon _sheldon sheldon completions --shell zsh
+  _gen_comp rg _rg rg --generate=complete-zsh
+  _gen_comp docker _docker docker completion zsh
+  _gen_comp sops _sops sops completion zsh
+  _gen_comp lazygit _lazygit lazygit completion zsh
+  _gen_comp terraform-docs _terraform-docs terraform-docs completion zsh
+  unfunction _gen_comp
+
+  for _comp in "$_dir"/_*(N); do
+    _have=1
+    if [[ ! -s $_dump || $_comp -nt $_dump ]]; then
+      _stale=1
+    fi
+  done
+  if (( _have )); then
+    fpath=("$_dir" $fpath)
+  fi
+  if (( _stale )); then
+    rm -f "$_dump" "$_dump.zwc"
+  fi
+}
+"""
+
+# zsh-completions のあと・fzf-tab の前に compinit
+[plugins.compinit]
+inline = "autoload -Uz compinit && compinit -C"
+
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+
+[plugins.fzf-tab]
+github = "Aloxaf/fzf-tab"
+
+# Must be loaded last among syntax-affecting plugins.
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"

@@ -25,10 +25,10 @@
 - GitHubへのログインと公開鍵の登録に使うブラウザ。
 
 - WSL導入後の作業では、Ubuntu内でもsudoを実行できることが必要である。
-- 会社のPCで管理者権限や外部への通信が制限されている場合は、導入前に担当者へ確認する。
-- Dockerは通常の導入には不要である。リポジトリを整備・検証する人だけが使用する。
+- 会社のPCで管理者権限や外部への通信が制限されている場合は、導入前に担当者へ確認する。Docker Engineの導入も制限対象になりうる。
 - Git・SSHは以下の手順で導入する。chezmoiはsnapで導入する（bootstrap.shでは入れない）。
-- WSLでsnapを使う場合は、systemdが有効であること。無効な場合は指導者へ確認する。
+- bootstrap.shはDocker Engineも公式aptリポジトリから導入する。
+- WSLでsnapとDockerを使う場合は、systemdが有効であること。無効な場合は指導者へ確認する。
 
 ### 用意しておくアカウント・情報
 
@@ -233,10 +233,10 @@ chezmoi init --source="$PWD"
 chezmoi apply --source="$PWD"
 ```
 
-- **確認結果**：`~/.config/mise/config.toml`が存在すること。
+- **確認結果**：`~/.config/mise/config.toml`と`~/.zshrc`が存在すること。
 
 ```bash
-test -f ~/.config/mise/config.toml && echo ok
+test -f ~/.config/mise/config.toml && test -f ~/.zshrc && echo ok
 ```
 
 - 個人設定（name / email）が無いと、以降の手順で困る場合がある。適用前に`chezmoi.toml`を確認する。
@@ -256,9 +256,11 @@ bash bootstrap.sh
 
 ### 導入結果を確認する
 
-- 新しいターミナルを開き、以下を実行する。
+- 新しいターミナルを開くか、`exec zsh`を実行する。
+- ログインシェルと主要コマンドを確認する。
 
 ```bash
+getent passwd "$USER" | cut -d: -f7
 git --version
 git-lfs --version
 mise --version
@@ -266,10 +268,43 @@ chezmoi --version
 gh --version
 sops --version
 age --version
+fzf --version
+rg --version
+fd --version
+eza --version
+sheldon --version
+starship --version
+atuin --version
+lazygit --version
+lefthook version
+node --version
+uv --version
+terraform version
+tflint --version
+terraform-docs --version
+broot --version
+gping --version
+rga --version
+lazydocker --version
+herdr --version
+hunk --version
+docker --version
 chezmoi diff
 ```
 
-- **完了条件**：各ツールのバージョンが表示され、`chezmoi diff`に意図しない差分がないこと。
+- Dockerをsudoなしで使うには、再ログインするか`newgrp docker`を実行する。
+
+```bash
+newgrp docker
+docker version
+sudo docker run --rm hello-world
+```
+
+- **完了条件**：
+  - ログインシェルが`/usr/bin/zsh`である。
+  - 上記コマンドのバージョンが表示される。
+  - `chezmoi diff`に意図しない差分がない。
+  - `docker version`と`hello-world`が成功する。
 
 ## 導入後の更新
 

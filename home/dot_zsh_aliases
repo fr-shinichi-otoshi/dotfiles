@@ -1,0 +1,11 @@
+# 一覧表示（eza）
+alias ls='eza --color=auto --group-directories-first'
+alias ll='eza -l --color=auto --group-directories-first'
+alias la='eza -la --color=auto --group-directories-first'
+alias lt='eza --tree --color=auto --group-directories-first'
+alias l='eza -1 --color=auto --group-directories-first'
+
+# GNU coreutils の色付け（エイリアス経由でない呼び出し向け）
+alias grep='grep --color=auto'
+alias egrep='grep -E --color=auto'
+alias fgrep='grep -F --color=auto'

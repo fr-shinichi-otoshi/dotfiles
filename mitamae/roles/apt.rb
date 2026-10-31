@@ -9,6 +9,9 @@ end
   curl
   git
   git-lfs
+  zsh
+  poppler-utils
+  pandoc
 ].each do |name|
   package name do
     action :install

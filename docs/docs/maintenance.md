@@ -3,7 +3,7 @@
 ## 対象環境
 
 - **開発環境**：WSL2上のUbuntu、またはLinuxのUbuntu。Ubuntu 24.04 LTSを検証基準とする。
-- **検証環境**：`ubuntu:24.04`のDockerコンテナで、導入処理と設定の初回適用・再適用を確認する。
+- **検証環境**：`ubuntu:24.04`相当のsystemd有効Dockerコンテナで、導入処理と設定の初回適用・再適用を確認する。
 
 ## 設定の管理場所
 
@@ -17,6 +17,7 @@
 
 - プロジェクト固有の依存関係とビルド手順。
 - プロジェクト固有のAI指示。
+- lefthookのフック定義（`lefthook.yml`）。dotfilesはlefthookバイナリのみ入れる。
 
 ### 各自で管理するもの
 
@@ -35,24 +36,33 @@
 | 層 | 役割 | 主な対象 |
 | --- | --- | --- |
 | snap / chezmoi | 設定配布の入口 | chezmoi導入、`init` / `apply` |
-| `bootstrap.sh` | プロビジョニング入口 | mitamae取得、レシピ実行、mise再install |
-| mitamae | マシンのプロビジョニング | apt、mise導入、`mise install`、bashrcへのPATH配線 |
-| mise | CLIの版管理 | gh、sops、age |
+| `bootstrap.sh` | プロビジョニング入口 | mitamae取得、レシピ実行、mise再install、sheldon lock |
+| mitamae | マシンのプロビジョニング | apt、Docker Engine、mise導入、bashrc PATH、chsh→zsh |
+| mise | CLI / ランタイムの版管理 | シェル系、Git系、node / terraform、herdr / hunk など |
 
-### 今回導入するツール
+### 導入するツール
 
 | ツール | 導入手段 | 版 |
 | --- | --- | --- |
-| git | apt（mitamae） | ディストリビューション提供 |
-| git-lfs | apt（mitamae） | ディストリビューション提供 |
+| git / git-lfs | apt（mitamae） | ディストリビューション提供 |
+| zsh | apt（mitamae） | ディストリビューション提供 |
+| poppler-utils / pandoc | apt（mitamae） | ripgrep-all用 |
 | chezmoi | snap（`--classic`） | snapチャネルの版 |
 | mitamae | GitHub Releases（bootstrap） | 2.0.6 |
 | mise | 公式インストーラ（mitamae） | インストーラが入れる版 |
-| gh | mise | 2.103.3 |
-| sops | mise | 3.13.3 |
-| age | mise | 1.3.2 |
+| Docker Engine | 公式aptリポジトリ（mitamae） | stableチャネル |
+| CLI一式 | mise | `home/dot_config/mise/config.toml`が正 |
 
-CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正である。chezmoiはmiseでは管理しない。
+miseで入れる主なCLIは次のとおりである。
+
+- 既存: `gh` / `sops` / `age`
+- シェル: `fzf` / `ripgrep` / `fd` / `eza` / `sheldon` / `starship` / `atuin`
+- Git: `lazygit` / `lefthook`（`gitui`は入れない）
+- ランタイム: `node` / `uv` / `terraform` / `tflint` / `terraform-docs`
+- 追加: `broot` / `gping` / `ripgrep-all` / `lazydocker`
+- エージェント／レビュー: `herdr` / `hunk`
+
+CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正である。chezmoiとDocker Engineはmiseでは管理しない。
 
 ## chezmoiとプロジェクトの関係
 
@@ -78,7 +88,8 @@ dotfiles/
 │   ├── recipes/default.rb
 │   └── roles/
 ├── home/                     # ホームディレクトリへ適用するソース
-│   └── dot_config/mise/config.toml
+│   ├── dot_zshenv / dot_zshrc / dot_zsh_aliases
+│   └── dot_config/{mise,sheldon,starship,atuin}/
 ├── docs/
 └── templates/                # プロジェクト用のひな形（今後）
 ```
@@ -93,7 +104,7 @@ dotfiles/
 - **実行ユーザー**：sudoを実行できる一般ユーザー。
 - **前提**：snapでchezmoiを導入し、このリポジトリをsourceにして`chezmoi apply`済みであること。
 - **入口**：リポジトリ直下で`bash bootstrap.sh`を実行する。
-- **担当する処理**：mitamaeの取得、レシピ実行、miseの再install。
+- **担当する処理**：mitamaeの取得、レシピ実行、miseの再install、sheldon lock。
 - **担当しない処理**：chezmoiのinstall / init / apply。日常更新用の`update.sh`は別途（未実装）。
 - **再実行**：導入済みのツールを考慮して処理する。
 - **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、bootstrap.shでは扱わない。
@@ -150,12 +161,12 @@ bash bootstrap.sh
 | 導入手順               | 記載済み・未検証                                  |
 | chezmoi（snap）        | 手順化済み（bootstrap外）                         |
 | bootstrap.sh           | 実装済み（プロビジョニング専用）                  |
-| mitamaeレシピ          | 実装済み（apt / mise / PATH配線）                 |
-| miseツール定義         | 実装済み（gh / sops / age）                       |
-| chezmoi土台            | 実装済み（`.chezmoiroot` / mise設定）             |
-| 共通アプリ設定         | 未実装（gitconfig、鍵運用など）                   |
+| mitamaeレシピ          | 実装済み（apt / Docker / mise / PATH / zsh）      |
+| miseツール定義         | 実装済み（シェル・Git・ランタイム・herdr / hunk） |
+| chezmoiシェル設定      | 実装済み（zsh / sheldon / starship / atuin）      |
+| 共通アプリ設定         | 一部未実装（gitconfig、鍵運用など）               |
 | update.sh              | 未実装（範囲外）                                  |
-| Docker検証・自動化     | 手動検証済み（systemd + SSHマウント）。自動化は未整備 |
+| Docker検証・自動化     | 手順更新済み。今回変更の再検証は未実施            |
 | WSL／Ubuntu実機検証    | 未実施                                            |
 
 ## 今後の整備順序
@@ -164,6 +175,5 @@ bash bootstrap.sh
 2. **共通設定の追加**：Git設定テンプレートなど、ホームに配布する設定を追加する。
 3. **秘密情報の扱い**：age / sops の鍵配置と運用を定める。
 4. **日常更新**：必要なら`update.sh`を追加する。
-5. **シェルや追加CLI**：必要に応じてツールと設定を五月雨で追加する。
 
 [セットアップ手順へ](getting-started.md)

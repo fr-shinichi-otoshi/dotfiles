@@ -1,0 +1,5 @@
+# Atuin configuration.
+# https://docs.atuin.sh/configuration/config/
+
+# Enter では実行せずプロンプトへ挿入する（実行はシェル側の Enter）
+enter_accept = false
