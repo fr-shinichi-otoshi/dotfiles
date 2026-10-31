@@ -1,0 +1,14 @@
+# 依存パッケージ
+node_modules/
+
+# キャッシュ
+.cache/
+
+# Docusaurusの生成ファイル
+docs/.docusaurus/
+
+# ビルド成果物
+docs/build/
+
+# ログ
+*.log
