@@ -1,9 +1,9 @@
 # dotfiles
 
-WSL／Ubuntu向けのAI駆動開発環境を、chezmoiで管理・共有するリポジトリである。
+WSL／Ubuntu向けのAI駆動開発環境を、chezmoi・mitamae・miseで管理・共有するリポジトリである。
 
-- **対象**：新卒やLinuxでの開発経験がないチームメンバー。
-- **環境**：WSL 2上のUbuntu、またはLinuxのUbuntu。検証基準はUbuntu 24.04 LTS。
+- **対象**：開発メンバー
+- **環境**：WSL 2上のUbuntu、またはLinuxのUbuntu。
 - **共有するもの**：開発ツールの導入処理、シェル・Git・AI開発ツールの共通設定。
 
 ## 導入の流れ
@@ -12,9 +12,19 @@ WSL／Ubuntu向けのAI駆動開発環境を、chezmoiで管理・共有する�
 2. SSH鍵を作成し、公開鍵をGitHubに登録する。
 3. SSH接続を確認し、リポジトリをクローンする。
 4. `echo`で個人設定を作成する。
-5. `bash bootstrap.sh`を実行する。
+5. snapでchezmoiを導入し、設定を適用する。
+6. `bash bootstrap.sh`を実行する。
 
 前提条件とコマンドは、[セットアップ手順](docs/docs/getting-started.md)を参照する。
+
+## 役割分担
+
+| 層 | 担当 |
+| --- | --- |
+| snap / chezmoi | chezmoi本体の導入とホーム設定の配布 |
+| `bootstrap.sh` | mitamaeの取得とレシピ実行（プロビジョニング） |
+| mitamae | aptパッケージ、mise導入、`mise install`、PATH配線 |
+| mise | CLIの版管理（gh / sops / age） |
 
 ## ドキュメント
 
@@ -38,6 +48,7 @@ pnpm start
 
 ## 現在の状態
 
-- `bootstrap.sh`と共通設定は未実装である。
+- snapのchezmoi適用後にbootstrapでプロビジョニングする流れまで実装済みである。
+- Git設定やage鍵などのアプリ設定の中身は未整備である。
 - Docker・実環境での導入検証は未実施である。
 - 詳細は[実装・検証状況](docs/docs/maintenance.md#実装検証状況)を参照する。

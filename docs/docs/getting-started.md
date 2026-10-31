@@ -2,7 +2,7 @@
 
 - **対象者**：新卒や、Linuxでの開発経験がないチームメンバー。
 - **進め方**：前提条件を確認し、初回セットアップを上から順に実行する。
-- **現在の状態**：bootstrap.shと共通設定は未実装である。[実装・検証状況](maintenance.md#実装検証状況)を確認してから利用する。
+- **現在の状態**：snapのchezmoi適用後にbootstrapでプロビジョニングする流れまで実装済みである。Git設定などのアプリ設定の中身は未整備である。[実装・検証状況](maintenance.md#実装検証状況)を確認してから利用する。
 
 ## 前提条件
 
@@ -27,7 +27,8 @@
 - WSL導入後の作業では、Ubuntu内でもsudoを実行できることが必要である。
 - 会社のPCで管理者権限や外部への通信が制限されている場合は、導入前に担当者へ確認する。
 - Dockerは通常の導入には不要である。リポジトリを整備・検証する人だけが使用する。
-- Git・SSH・chezmoiは事前にインストールしなくてよい。Git・SSHは以下の手順で、chezmoiはbootstrap.shで導入する。
+- Git・SSHは以下の手順で導入する。chezmoiはsnapで導入する（bootstrap.shでは入れない）。
+- WSLでsnapを使う場合は、systemdが有効であること。無効な場合は指導者へ確認する。
 
 ### 用意しておくアカウント・情報
 
@@ -54,8 +55,9 @@
 4. GitHubへのSSH接続を確認する。
 5. dotfilesをSSHでクローンする。
 6. 名前・メールアドレスを設定する。
-7. `~/dotfiles`で`bootstrap.sh`を実行する。
-8. 新しいターミナルで導入結果を確認する。
+7. snapでchezmoiを導入し、設定を適用する。
+8. `~/dotfiles`で`bootstrap.sh`を実行する。
+9. 新しいターミナルで導入結果を確認する。
 
 - WindowsのWSL導入はPowerShell、以降のコマンドはUbuntuで実行する。
 - GitHubへの公開鍵登録はブラウザで行う。
@@ -180,7 +182,7 @@ cd ~/dotfiles
 ```
 
 - **確認結果**：クローンが完了し、`~/dotfiles`へ移動できること。
-- **次の操作**：クローン後に個人設定を作成し、その後で`bootstrap.sh`を実行する。
+- **次の操作**：クローン後に個人設定を作成し、chezmoiを導入して設定を適用する。
 
 ### 名前とメールアドレスを設定する
 
@@ -213,16 +215,43 @@ name = "Taro Yamada"
 email = "taro@example.com"
 ```
 
+### chezmoiを導入し、設定を適用する
+
+- **実行場所**：取得したリポジトリ内（`~/dotfiles`）。
+- snapでchezmoiを導入する。`--classic`が必要である。
+
+```bash
+sudo snap install chezmoi --classic
+chezmoi --version
+```
+
+- このリポジトリをsourceにして初期化し、ホームへ設定を適用する。
+
+```bash
+cd ~/dotfiles
+chezmoi init --source="$PWD"
+chezmoi apply --source="$PWD"
+```
+
+- **確認結果**：`~/.config/mise/config.toml`が存在すること。
+
+```bash
+test -f ~/.config/mise/config.toml && echo ok
+```
+
+- 個人設定（name / email）が無いと、以降の手順で困る場合がある。適用前に`chezmoi.toml`を確認する。
+
 ### bootstrap.shを実行する
 
 - **実行場所**：取得したリポジトリ内（`~/dotfiles`）。
+- **前提**：上記のchezmoi適用が完了していること。
 - **操作**：以下を実行し、sudoのパスワードを求められたらUbuntuのパスワードを入力する。
 
 ```bash
 bash bootstrap.sh
 ```
 
-- chezmoiの導入と共通設定の適用は、このスクリプトが行う設計である。処理の詳細は[管理・保守の方針](maintenance.md)を参照する。
+- mitamaeによるパッケージ導入と、miseによるCLI導入を、このスクリプトが行う。chezmoiのinstall / applyは行わない。処理の詳細は[管理・保守の方針](maintenance.md)を参照する。
 - `sudo bash bootstrap.sh`ではなく、上記のとおり一般ユーザーで実行する。
 
 ### 導入結果を確認する
@@ -230,13 +259,17 @@ bash bootstrap.sh
 - 新しいターミナルを開き、以下を実行する。
 
 ```bash
-chezmoi --version
 git --version
+git-lfs --version
+mise --version
+chezmoi --version
+gh --version
+sops --version
+age --version
 chezmoi diff
 ```
 
-- **完了条件**：ツールのバージョンが表示され、`chezmoi diff`に意図しない差分がないこと。
-- **追加する確認**：導入ツールの選定後、ツールごとの起動・設定確認を追記する。
+- **完了条件**：各ツールのバージョンが表示され、`chezmoi diff`に意図しない差分がないこと。
 
 ## 導入後の更新
 
@@ -247,11 +280,13 @@ chezmoi diff
 ```bash
 cd ~/dotfiles
 git pull --ff-only
+chezmoi apply --source="$PWD"
 bash bootstrap.sh
 ```
 
 - 更新後も「導入結果を確認する」を確認する。
 - 個人設定を作成するコマンドは、通常の更新では実行しない。
+- 日常更新用の`update.sh`は未実装である。
 
 ## 困ったとき
 
@@ -276,7 +311,18 @@ bash bootstrap.sh
 ### bootstrap.shが見つからない
 
 - `~/dotfiles`で実行しているか確認する。
-- 配布されているブランチにスクリプトがあるか確認する。現時点では未実装である。
+- 配布されているブランチにスクリプトがあるか確認する。
+
+### chezmoi または mise 設定が無いと bootstrap が停止する
+
+- [chezmoiを導入し、設定を適用する](#chezmoiを導入し設定を適用する)を先に完了する。
+- `chezmoi`コマンドが無い場合は、snap導入を確認する。
+- `~/.config/mise/config.toml`が無い場合は、`chezmoi apply --source="$PWD"`を再実行する。
+
+### snap install に失敗する
+
+- WSLでsystemdが無効な場合がある。指導者へ確認する。
+- `sudo snap install chezmoi --classic`のエラー全文を残して共有する。
 
 ## 参考資料
 

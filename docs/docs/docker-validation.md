@@ -2,84 +2,119 @@
 
 ## 検証の対象と前提
 
-- **目的**：ホストのホーム設定を変更せず、初回構築と再適用を確認する。
+- **目的**：ホストのホーム設定を変更せず、初回構築・再適用・GitHub SSH認証を確認する。
 - **対象**：ローカルのdotfilesリポジトリ。未コミット・未プッシュの変更も含む。
-- **SSH認証との関係**：この検証ではソースをコピーするため、GitHub用の鍵生成・登録・クローンは行わない。実際の導入では利用者向け手順でSSH認証を確認する。
+- **流れ**：systemd有効コンテナで、snapのchezmoi適用 → `bootstrap.sh` → `ssh -T git@github.com`。
+- **ソース**：リポジトリはバインドマウントする。GitHubからのクローンは行わない。
+- **SSH**：ホストの`~/.ssh`をread-onlyでマウントし、認証だけ確認する。
 - **前提**：Dockerが起動済みであり、`docker version`でサーバーへ接続できること。
-- **適用前の準備**：管理対象、除外設定、必要な個人設定を整えること。
-- **手順の位置付け**：以下の手動検証手順は未実行である。Dockerfileと自動検証は今後追加する。
+- **イメージ**：素の`ubuntu:24.04`には`/sbin/init`が無いため、検証では`jrei/systemd-ubuntu:24.04`を使う。
+- **Dockerと実環境の差**：コンテナ起動オプションと、後述のsnapバイナリコピーは検証専用である。
 
-## 検証用コンテナにローカルのソースを渡す
+## 検証用コンテナを起動する
 
-ホスト側でdotfilesリポジトリのルートに移動し、以下を実行する。PowerShellでも実行できる。
+ホスト側でdotfilesリポジトリのルートに移動して実行する。以下はbash（WSL）向けの例である。
 
 ```bash
-docker run --rm -dit --name dotfiles-check ubuntu:24.04 bash
-docker cp . dotfiles-check:/tmp/dotfiles
-docker exec -it dotfiles-check bash
+REPO_DIR="$(pwd)"
+SSH_DIR="${HOME}/.ssh"
+
+docker rm -f dotfiles-check >/dev/null 2>&1 || true
+
+docker run -d --name dotfiles-check \
+  --privileged \
+  --cgroupns=host \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+  -v "${REPO_DIR}:/mnt/dotfiles:ro" \
+  -v "${SSH_DIR}:/mnt/host-ssh:ro" \
+  jrei/systemd-ubuntu:24.04
+
+sleep 5
+docker exec dotfiles-check systemctl is-system-running
 ```
 
-- **コピー対象**：現在のディレクトリ全体。コピー前に認証情報などを置いていないことを確認する。
-- **検証対象の更新**：コピー後のホスト側の変更は自動反映されない。再検証時は新しいコンテナへコピーする。
-- **ホストとの接続**：ホームディレクトリとDockerソケットはマウントしない。
+- **systemd**：イメージのPID 1がsystemdである。`--privileged`とcgroupマウントでsnapdを動かす。
+- **リポジトリ**：`/mnt/dotfiles`へread-onlyマウント。作業はホーム配下のコピーで行う。
+- **SSH**：`/mnt/host-ssh`へread-onlyマウント。ユーザー作成後に`~/.ssh`へコピーする。
 
 ## 一般ユーザーの検証環境を作る
 
-コンテナ内のrootとして実行する。
+コンテナ内のrootとして、セットアップスクリプトを実行する。
+
+```bash
+docker exec -u root dotfiles-check bash /mnt/dotfiles/scripts/docker-validate-setup.sh
+```
+
+手動で同等の処理を行う場合の要点は次のとおりである。
 
 ```bash
 apt-get update
-apt-get install -y ca-certificates curl git sudo
-useradd --create-home --shell /bin/bash --groups sudo developer
-passwd developer
+DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  ca-certificates curl git openssh-client sudo snapd dbus
 
-mkdir -p /home/developer/dotfiles
-cp -a /tmp/dotfiles/. /home/developer/dotfiles/
+id developer >/dev/null 2>&1 || useradd --create-home --shell /bin/bash developer
+echo 'developer ALL=(ALL) NOPASSWD:ALL' >/etc/sudoers.d/developer
+chmod 440 /etc/sudoers.d/developer
+
+rm -rf /home/developer/dotfiles-work
+mkdir -p /home/developer/dotfiles-work /home/developer/.ssh
+cp -a /mnt/dotfiles/. /home/developer/dotfiles-work/
+cp -a /mnt/host-ssh/. /home/developer/.ssh/
+chmod 700 /home/developer/.ssh
+chmod 600 /home/developer/.ssh/id_* 2>/dev/null || true
+chmod 644 /home/developer/.ssh/*.pub /home/developer/.ssh/known_hosts /home/developer/.ssh/config 2>/dev/null || true
 chown -R developer:developer /home/developer
-su - developer
+
+systemctl enable --now snapd.socket snapd.service
+ln -sfn /var/lib/snapd/snap /snap
 ```
 
-- `passwd`で検証用パスワードを設定する。以降のsudoでも同じパスワードを使う。
-- `su - developer`以降は一般ユーザーとして作業する。
+## chezmoi適用とbootstrap
 
-## bootstrap.shで初回導入と再実行を確認する
+developerユーザーで検証スクリプトを実行する。
 
-1. [名前とメールアドレスを設定する](getting-started.md#名前とメールアドレスを設定する)を実行する。検証用の名前・メールアドレスを使う。
-2. コピーしたリポジトリでbootstrap.shを実行する。chezmoiは事前に導入しない。
+```bash
+docker exec -u developer -w /home/developer \
+  -e HOME=/home/developer -e USER=developer \
+  -e PATH=/usr/local/bin:/snap/bin:/home/developer/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+  dotfiles-check bash /home/developer/dotfiles-work/scripts/docker-validate-run.sh
+```
 
-   ```bash
-   cd ~/dotfiles
-   bash bootstrap.sh
-   ```
+スクリプトが行う内容は次のとおりである。
 
-3. [導入結果を確認する](getting-started.md#導入結果を確認する)のコマンドを、新しいシェルでも実行する。
-4. 同じリポジトリで`bash bootstrap.sh`を再実行し、個人設定の保持と処理結果を確認する。
+1. 検証用の`~/.config/chezmoi/chezmoi.toml`を作成する。
+2. `sudo snap install chezmoi --classic`でchezmoiを導入する。
+3. Dockerでは一般ユーザーがsnap実行できない場合があるため、`/snap/chezmoi/current/chezmoi`を`/usr/local/bin/chezmoi`へコピーする。
+4. `chezmoi init` / `chezmoi apply`で`~/.config/mise/config.toml`を配置する。
+5. `bash bootstrap.sh`を初回実行する。
+6. 各ツールのバージョンと`chezmoi diff`を確認する。
+7. `bash bootstrap.sh`を再実行する。
+8. `ssh -T git@github.com`で認証する（`successfully authenticated`があれば合格。終了コードは1になりうる）。
+
+成功時は標準出力に`ALL_CHECKS_PASSED`が出力される。
 
 ## 合格条件
 
-- [ ] 初回の導入・設定適用が一般ユーザーで完了する。
-- [ ] 管理対象だけが意図した場所に配置される。
-- [ ] 入力した個人設定が反映される。
-- [ ] 新しいシェルからツールを起動できる。
-- [ ] 再適用で設定の重複・破損・不要な再インストールが発生しない。
-- [ ] 適用後の`chezmoi diff`に意図しない差分が残らない。
-- [ ] 新しいコンテナでも同じ手順で初回構築を再現できる。
+- [x] snapでchezmoiを導入し、`chezmoi apply`で`~/.config/mise/config.toml`が配置される。
+- [x] 初回の`bootstrap.sh`が一般ユーザーで完了する。
+- [x] 新しいシェルから`git` / `git-lfs` / `mise` / `chezmoi` / `gh` / `sops` / `age`を起動できる。
+- [x] `chezmoi diff`に意図しない差分が残らない。
+- [x] `bootstrap.sh`の再実行が致命的に失敗しない。
+- [x] マウントしたSSH鍵で`ssh -T git@github.com`が成功する。
+- [ ] 新しいコンテナでも同じ手順で初回構築を再現できる（必要なら再実行して確認する）。
 
 ## 終了・再検証
 
-1. `exit`で一般ユーザーのシェルを抜け、もう一度`exit`で`docker exec`を終了する。
-2. ホスト側でコンテナを停止する。`--rm`によりコンテナ内の設定も削除される。
+```bash
+docker rm -f dotfiles-check
+```
 
-   ```bash
-   docker stop dotfiles-check
-   ```
-
-3. 初回構築を再検証する場合は、「検証用コンテナにローカルのソースを渡す」から新しいコンテナでやり直す。
+再検証する場合は、「検証用コンテナを起動する」からやり直す。
 
 ## 実環境で別途確認する項目
 
-- **WSL2上のUbuntu**：WSLの導入・起動と、Windowsとの連携。
-- **利用対象の実環境**：GUIツール、デスクトップとの連携、systemdを前提とするサービス。
-- **各自のアカウントを設定した実環境**：AI開発ツールの認証と実際の利用。
+- **WSL2上のUbuntu**：Windowsとの連携、利用者向けの対話的sudo、snapをそのまま使う場合の動作。
+- **GUIやデスクトップ連携**：このDocker検証の対象外。
+- **各自のアカウント**：AI開発ツールの認証と実際の利用。
 
 [セットアップ手順へ](getting-started.md)

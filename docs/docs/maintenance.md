@@ -28,7 +28,31 @@
 - 個人差のある設定は、chezmoiのテンプレートで共通部分と分離する。
 - 利用者は`echo`コマンドで名前・メールアドレスの設定ファイルを作成する。テンプレートの作成・保守は整備者が担当する。
 - 認証情報はリポジトリにコミットしない。
-- 導入するツールとバージョンは、選定後に一覧を追加する。
+- ホーム配下のドットファイルはchezmoiのみが管理する。mitamaeはプロビジョニングに限定する。
+
+## 導入のレイヤ
+
+| 層 | 役割 | 主な対象 |
+| --- | --- | --- |
+| snap / chezmoi | 設定配布の入口 | chezmoi導入、`init` / `apply` |
+| `bootstrap.sh` | プロビジョニング入口 | mitamae取得、レシピ実行、mise再install |
+| mitamae | マシンのプロビジョニング | apt、mise導入、`mise install`、bashrcへのPATH配線 |
+| mise | CLIの版管理 | gh、sops、age |
+
+### 今回導入するツール
+
+| ツール | 導入手段 | 版 |
+| --- | --- | --- |
+| git | apt（mitamae） | ディストリビューション提供 |
+| git-lfs | apt（mitamae） | ディストリビューション提供 |
+| chezmoi | snap（`--classic`） | snapチャネルの版 |
+| mitamae | GitHub Releases（bootstrap） | 2.0.6 |
+| mise | 公式インストーラ（mitamae） | インストーラが入れる版 |
+| gh | mise | 2.103.3 |
+| sops | mise | 3.13.3 |
+| age | mise | 1.3.2 |
+
+CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正である。chezmoiはmiseでは管理しない。
 
 ## chezmoiとプロジェクトの関係
 
@@ -43,41 +67,36 @@
 ~/develop/              # 各プロジェクトの配置先の例
 ```
 
-## リポジトリ構成案
-
-以下は今後追加するファイルの構成案である。
+## リポジトリ構成
 
 ```text
 dotfiles/
 ├── README.md
-├── bootstrap.sh         # chezmoiの導入・初期化・設定適用の入口
-├── .chezmoiroot          # 内容をhomeとし、管理対象のルートを指定
-├── home/                # ホームディレクトリへ適用するソース
-│   ├── .chezmoiignore         # home/内で適用から除外するファイル
-│   ├── dot_gitconfig.tmpl    # ~/.gitconfigのテンプレート
-│   ├── dot_config/           # ~/.config配下に配置する設定
-│   └── run_once_before_*.sh  # 初回の設定適用前に実行する導入処理
-├── docs/                 # 詳細な手順
-└── templates/            # プロジェクト用のひな形
+├── bootstrap.sh              # プロビジョニングの入口
+├── .chezmoiroot              # 内容をhomeとし、管理対象のルートを指定
+├── mitamae/                  # プロビジョニング用レシピ
+│   ├── recipes/default.rb
+│   └── roles/
+├── home/                     # ホームディレクトリへ適用するソース
+│   └── dot_config/mise/config.toml
+├── docs/
+└── templates/                # プロジェクト用のひな形（今後）
 ```
 
 - **読み込み先**：リポジトリ直下の`.chezmoiroot`に`home`を記載し、`home/`を管理対象のルートにする。
-- **配置の対応**：`home/dot_gitconfig.tmpl`は`~/.gitconfig`、`home/dot_config/`は`~/.config/`に対応する。
-- **開発用ファイル**：README、`docs/`、`templates/`は`home/`の外に置き、ホームへの配置対象から分離する。
-- **除外設定**：`home/`内に配置しないファイルがある場合は、`home/.chezmoiignore`に記載する。
+- **配置の対応**：`home/dot_config/`は`~/.config/`に対応する。
+- **開発用ファイル**：README、`docs/`、`mitamae/`、`bootstrap.sh`は`home/`の外に置き、ホームへの配置対象から分離する。
 - **既存ファイルの扱い**：`.agent/`、`.cursor/`、`CLAUDE.md`は、リポジトリ開発用ならルートに残し、配布する設定のみchezmoiの命名規則に従って`home/`配下へ追加する。
 
 ## bootstrap.shの設計
 
 - **実行ユーザー**：sudoを実行できる一般ユーザー。
+- **前提**：snapでchezmoiを導入し、このリポジトリをsourceにして`chezmoi apply`済みであること。
 - **入口**：リポジトリ直下で`bash bootstrap.sh`を実行する。
-- **担当する処理**：必要なパッケージとchezmoiの導入、個人設定の確認、ソースの初期化、共通設定の適用。
-- **個人設定**：`echo`で作成した名前・メールアドレスを保持する。不足がある場合は、作成手順を案内して停止する。
-- **ソース**：実行したリポジトリをchezmoiの参照先としてローカル設定に記録し、別途クローンしない。
-- **PATH**：新しいUbuntuのターミナルでもchezmoiを起動できる設定を含める。
-- **再実行**：個人設定を上書きせず、導入済みのツールを考慮して処理する。
+- **担当する処理**：mitamaeの取得、レシピ実行、miseの再install。
+- **担当しない処理**：chezmoiのinstall / init / apply。日常更新用の`update.sh`は別途（未実装）。
+- **再実行**：導入済みのツールを考慮して処理する。
 - **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、bootstrap.shでは扱わない。
-- **実装状況**：この節は設計方針であり、スクリプトは未実装である。
 
 ## 運用：設定の変更と更新
 
@@ -99,6 +118,16 @@ dotfiles/
 3. 個人情報・認証情報を除き、個人差はテンプレートに切り出す。
 4. Dockerで検証した後、変更をコミット・プッシュする。
 
+### CLIを追加する
+
+1. `home/dot_config/mise/config.toml`の`[tools]`へ版を追加する。
+2. `chezmoi apply`のあと`bash bootstrap.sh`を再実行する。または`mise install`を実行する。
+
+### aptパッケージを追加する
+
+1. `mitamae/roles/apt.rb`へパッケージ名を追加する。
+2. `bash bootstrap.sh`を再実行する。
+
 ### リモートの更新を適用する
 
 - **直接利用の場合**：取得元のリポジトリを更新する。
@@ -108,6 +137,7 @@ dotfiles/
 ```bash
 cd ~/dotfiles
 git pull --ff-only
+chezmoi apply --source="$PWD"
 bash bootstrap.sh
 ```
 
@@ -115,22 +145,25 @@ bash bootstrap.sh
 
 ## 実装・検証状況
 
-| 項目                   | 状態             |
-| ---------------------- | ---------------- |
-| 導入手順               | 記載済み・未検証 |
-| bootstrap.sh           | 未実装           |
-| 共通設定・テンプレート | 未実装           |
-| 管理対象・除外設定     | 未整備           |
-| Docker検証・自動化     | 未実施           |
-| WSL／Ubuntu実機検証    | 未実施           |
+| 項目                   | 状態                                              |
+| ---------------------- | ------------------------------------------------- |
+| 導入手順               | 記載済み・未検証                                  |
+| chezmoi（snap）        | 手順化済み（bootstrap外）                         |
+| bootstrap.sh           | 実装済み（プロビジョニング専用）                  |
+| mitamaeレシピ          | 実装済み（apt / mise / PATH配線）                 |
+| miseツール定義         | 実装済み（gh / sops / age）                       |
+| chezmoi土台            | 実装済み（`.chezmoiroot` / mise設定）             |
+| 共通アプリ設定         | 未実装（gitconfig、鍵運用など）                   |
+| update.sh              | 未実装（範囲外）                                  |
+| Docker検証・自動化     | 手動検証済み（systemd + SSHマウント）。自動化は未整備 |
+| WSL／Ubuntu実機検証    | 未実施                                            |
 
 ## 今後の整備順序
 
-1. **管理対象の確定**：ツール・バージョン・共通設定・個人設定を一覧化する。
-2. **配置対象の整理**：`.chezmoiroot`に`home`を指定し、配布用ファイルを`home/`へ集約する。配布対象内に除外するファイルがある場合は、`home/.chezmoiignore`を追加する。
-3. **設定の実装**：`echo`で作成した個人設定を読み込むテンプレートと、シェル・Git・AI開発ツールの共通設定を追加する。初期段階では対話入力による個人設定の自動生成は導入しない。
-4. **導入処理の実装**：`bootstrap.sh`にchezmoiの導入・参照先の記録・初期化・適用をまとめる。個人設定の保持と再実行時の動作を整える。
-5. **Dockerでの検証**：[セットアップ手順](getting-started.md)の手順を実行し、確認できた手順をDockerfile・自動検証へ移す。
-6. **実環境での確認**：WSL／Ubuntuで残りの項目を検証し、利用者向け手順を確定する。
+1. **実環境・Dockerでの検証**：snap → apply → bootstrap の初回・再実行を確認する。
+2. **共通設定の追加**：Git設定テンプレートなど、ホームに配布する設定を追加する。
+3. **秘密情報の扱い**：age / sops の鍵配置と運用を定める。
+4. **日常更新**：必要なら`update.sh`を追加する。
+5. **シェルや追加CLI**：必要に応じてツールと設定を五月雨で追加する。
 
 [セットアップ手順へ](getting-started.md)
