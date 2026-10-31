@@ -46,6 +46,7 @@
 | --- | --- | --- |
 | git / git-lfs | apt（mitamae） | ディストリビューション提供 |
 | zsh | apt（mitamae） | ディストリビューション提供 |
+| vim | apt（mitamae） | ディストリビューション提供。設定はchezmoiの`.vimrc` |
 | poppler-utils / pandoc | apt（mitamae） | ripgrep-all用 |
 | chezmoi | snap（`--classic`） | snapチャネルの版 |
 | mitamae | GitHub Releases（bootstrap） | 2.0.6 |
@@ -89,6 +90,7 @@ dotfiles/
 │   └── roles/
 ├── home/                     # ホームディレクトリへ適用するソース
 │   ├── dot_zshenv / dot_zshrc / dot_zsh_aliases
+│   ├── dot_vimrc
 │   └── dot_config/{mise,sheldon,starship,atuin}/
 ├── docs/
 └── templates/                # プロジェクト用のひな形（今後）
@@ -164,6 +166,7 @@ bash bootstrap.sh
 | mitamaeレシピ          | 実装済み（apt / Docker / mise / PATH / zsh）      |
 | miseツール定義         | 実装済み（シェル・Git・ランタイム・herdr / hunk） |
 | chezmoiシェル設定      | 実装済み（zsh / sheldon / starship / atuin）      |
+| chezmoi Vim設定        | 実装済み（`.vimrc` + vim-plug 自動導入）          |
 | 共通アプリ設定         | 一部未実装（gitconfig、鍵運用など）               |
 | update.sh              | 未実装（範囲外）                                  |
 | Docker検証・自動化     | 手順更新済み。今回変更の再検証は未実施            |

@@ -18,6 +18,7 @@ chezmoi init --source="${PWD}"
 chezmoi apply --source="${PWD}"
 test -f "${HOME}/.config/mise/config.toml"
 test -f "${HOME}/.zshrc"
+test -f "${HOME}/.vimrc"
 echo mise_config_ok
 
 bash bootstrap.sh
@@ -57,6 +58,7 @@ lazydocker --version
 herdr --version
 hunk --version
 docker --version
+vim --version | head -n 1
 sudo docker version
 # 検証コンテナ内の Docker-in-Docker では overlay マウントに失敗することがある。
 # 実機では getting-started の hello-world 確認を行う。ここでは失敗しても続行する。

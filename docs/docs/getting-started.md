@@ -233,10 +233,10 @@ chezmoi init --source="$PWD"
 chezmoi apply --source="$PWD"
 ```
 
-- **確認結果**：`~/.config/mise/config.toml`と`~/.zshrc`が存在すること。
+- **確認結果**：`~/.config/mise/config.toml`と`~/.zshrc`と`~/.vimrc`が存在すること。
 
 ```bash
-test -f ~/.config/mise/config.toml && test -f ~/.zshrc && echo ok
+test -f ~/.config/mise/config.toml && test -f ~/.zshrc && test -f ~/.vimrc && echo ok
 ```
 
 - 個人設定（name / email）が無いと、以降の手順で困る場合がある。適用前に`chezmoi.toml`を確認する。
@@ -289,9 +289,11 @@ lazydocker --version
 herdr --version
 hunk --version
 docker --version
+vim --version | head -n 1
 chezmoi diff
 ```
 
+- Vimは`chezmoi apply`後に一度`vim`を起動すると、vim-plugとプラグインが自動導入される（`curl`が必要。aptのvimはbootstrapで入る）。
 - Dockerをsudoなしで使うには、再ログインするか`newgrp docker`を実行する。
 
 ```bash

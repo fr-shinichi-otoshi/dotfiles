@@ -10,6 +10,7 @@ end
   git
   git-lfs
   zsh
+  vim
   poppler-utils
   pandoc
 ].each do |name|

@@ -1,0 +1,245 @@
+" =============================================================================
+" Basic
+" =============================================================================
+
+set nocompatible
+
+let mapleader = " "
+
+set encoding=utf-8
+set number
+set relativenumber
+set cursorline
+set hidden
+set signcolumn=yes
+
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+
+set splitbelow
+set splitright
+
+set updatetime=300
+set timeoutlen=500
+
+
+" =============================================================================
+" vim-plug bootstrap
+"
+" .vimrcだけを配置すれば、初回起動時に以下を自動実行する。
+"   1. vim-plugの導入
+"   2. 未導入プラグインのインストール
+"   3. .vimrcの再読み込み
+" =============================================================================
+
+if has('win32') || has('win64')
+  " Git Bash / Windows Vim
+  let s:vim_dir = expand('~/vimfiles')
+else
+  " Linux / macOS
+  let s:vim_dir = expand('~/.vim')
+endif
+
+let s:plug_vim = s:vim_dir . '/autoload/plug.vim'
+let s:plug_dir = s:vim_dir . '/plugged'
+
+" 念のためruntimepathへ追加
+execute 'set runtimepath^=' . fnameescape(s:vim_dir)
+
+" vim-plug自身がなければダウンロード
+if !filereadable(s:plug_vim)
+  if !executable('curl')
+    echoerr 'curlが見つからないため、vim-plugを導入できません。'
+    finish
+  endif
+
+  call mkdir(fnamemodify(s:plug_vim, ':h'), 'p')
+
+  echom 'Installing vim-plug...'
+
+  let s:plug_url =
+        \ 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+
+  let s:download_command =
+        \ 'curl -fLo ' . shellescape(s:plug_vim)
+        \ . ' --create-dirs '
+        \ . shellescape(s:plug_url)
+
+  call system(s:download_command)
+
+  if v:shell_error != 0
+    echoerr 'vim-plugのダウンロードに失敗しました。'
+    finish
+  endif
+endif
+
+
+" =============================================================================
+" Plugins
+" =============================================================================
+
+call plug#begin(s:plug_dir)
+
+" Git操作
+Plug 'tpope/vim-fugitive'
+
+" Git変更行・ハンク操作
+Plug 'airblade/vim-gitgutter'
+
+" git commit時の差分表示
+Plug 'rhysd/committia.vim'
+
+" gcc / gcによるコメント切り替え
+Plug 'tpope/vim-commentary'
+
+" クォートや括弧の追加・変更
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-repeat'
+
+" ファイルツリー
+Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
+
+" ステータスライン
+Plug 'itchyny/lightline.vim'
+
+" Helmテンプレートのシンタックス
+Plug 'towolf/vim-helm', { 'for': ['yaml', 'helm'] }
+
+call plug#end()
+
+
+" =============================================================================
+" 未導入プラグインの自動インストール
+" =============================================================================
+
+let s:missing_plugins =
+      \ filter(values(g:plugs), '!isdirectory(v:val.dir)')
+
+if !empty(s:missing_plugins)
+  augroup vim_plug_auto_install
+    autocmd!
+    autocmd VimEnter *
+          \ PlugInstall --sync |
+          \ source $MYVIMRC
+  augroup END
+endif
+
+
+" =============================================================================
+" YAML / Kubernetes
+" =============================================================================
+
+augroup yaml_settings
+  autocmd!
+
+  autocmd FileType yaml setlocal expandtab
+  autocmd FileType yaml setlocal tabstop=2
+  autocmd FileType yaml setlocal shiftwidth=2
+  autocmd FileType yaml setlocal softtabstop=2
+
+  autocmd FileType yaml setlocal autoindent
+  autocmd FileType yaml setlocal nosmartindent
+
+  autocmd FileType yaml setlocal commentstring=#\ %s
+
+  " タブと行末空白を可視化
+  autocmd FileType yaml setlocal list
+  autocmd FileType yaml setlocal listchars=tab:>-,trail:·
+
+  " 長い行の目安
+  autocmd FileType yaml setlocal colorcolumn=121
+augroup END
+
+
+" =============================================================================
+" Git commit
+" =============================================================================
+
+augroup gitcommit_settings
+  autocmd!
+
+  autocmd FileType gitcommit setlocal textwidth=72
+  autocmd FileType gitcommit setlocal colorcolumn=51,73
+
+  " 英文コミット用
+  autocmd FileType gitcommit setlocal spell
+  autocmd FileType gitcommit setlocal spelllang=en
+augroup END
+
+
+" =============================================================================
+" Fugitive
+" =============================================================================
+
+nnoremap <silent> <leader>gs :Git<CR>
+nnoremap <silent> <leader>ga :Git add %<CR>
+nnoremap <silent> <leader>gc :Git commit<CR>
+nnoremap <silent> <leader>gd :Gdiffsplit<CR>
+nnoremap <silent> <leader>gb :Git blame<CR>
+nnoremap <leader>gg :Git grep<Space>
+
+
+" =============================================================================
+" GitGutter
+" =============================================================================
+
+let g:gitgutter_map_keys = 0
+
+nmap ]h <Plug>(GitGutterNextHunk)
+nmap [h <Plug>(GitGutterPrevHunk)
+
+nmap <leader>hs <Plug>(GitGutterStageHunk)
+nmap <leader>hu <Plug>(GitGutterUndoHunk)
+nmap <leader>hp <Plug>(GitGutterPreviewHunk)
+
+
+" =============================================================================
+" NERDTree
+" =============================================================================
+
+nnoremap <silent> <leader>e :NERDTreeToggle<CR>
+nnoremap <silent> <leader>E :NERDTreeFind<CR>
+
+let g:NERDTreeShowHidden = 1
+let g:NERDTreeMinimalUI = 1
+
+
+" =============================================================================
+" Lightline
+" =============================================================================
+
+set laststatus=2
+set noshowmode
+
+let g:lightline = {
+      \ 'active': {
+      \   'left': [
+      \     ['mode', 'paste'],
+      \     ['readonly', 'filename', 'modified']
+      \   ],
+      \   'right': [
+      \     ['lineinfo'],
+      \     ['percent'],
+      \     ['filetype']
+      \   ]
+      \ }
+      \ }
+
+
+" =============================================================================
+" Navigation
+" =============================================================================
+
+nnoremap <silent> <Esc><Esc> :nohlsearch<CR>
+
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+nnoremap <silent> [b :bprevious<CR>
+nnoremap <silent> ]b :bnext<CR>
+
+nnoremap <silent> <leader>w :write<CR>
