@@ -2,7 +2,7 @@
 
 ## 対象環境
 
-- **開発環境**：WSL 2上のUbuntu、またはLinuxのUbuntu。Ubuntu 24.04 LTSを検証基準とする。
+- **開発環境**：WSL2上のUbuntu、またはLinuxのUbuntu。Ubuntu 24.04 LTSを検証基準とする。
 - **検証環境**：`ubuntu:24.04`のDockerコンテナで、導入処理と設定の初回適用・再適用を確認する。
 
 ## 設定の管理場所

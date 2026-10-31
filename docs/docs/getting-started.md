@@ -10,7 +10,7 @@
 
 **Windowsの場合**
 
-- WSL 2を利用できるWindowsであること。対応条件は[Microsoft公式手順](https://learn.microsoft.com/en-us/windows/wsl/install)で確認する。
+- WSL2を利用できるWindowsであること。対応条件は[Microsoft公式手順](https://learn.microsoft.com/en-us/windows/wsl/install)で確認する。
 - WSLの導入時に管理者権限を使用できること。
 - Ubuntu 24.04 LTSは、以下の手順で導入する。
 
@@ -42,7 +42,7 @@
 ### コマンドを実行するときの約束
 
 - コードブロック内のコマンドを、上から順に実行する。
-- 例の名前・メールアドレス・`YOUR_GITHUB_USERNAME`は、自分または案内された値に置き換える。
+- `<>`で囲まれた箇所は、自分または案内された値に置き換える。
 - エラーが出た場合は、そのまま次へ進まず指導者に確認する。
 - 既存の設定があるPCでは、適用前に対象ファイルをバックアップする。新規環境ではこの作業は不要である。
 
@@ -53,7 +53,7 @@
 3. 公開鍵をGitHubに登録する。
 4. GitHubへのSSH接続を確認する。
 5. dotfilesをSSHでクローンする。
-6. `echo`で名前・メールアドレスを設定する。
+6. 名前・メールアドレスを設定する。
 7. `~/dotfiles`で`bootstrap.sh`を実行する。
 8. 新しいターミナルで導入結果を確認する。
 
@@ -95,20 +95,22 @@ sudo apt-get install -y git openssh-client ca-certificates
 
 ### SSHの公開鍵と秘密鍵を作成する
 
-- `taro@example.com`を、自分のGitHubアカウントのメールアドレスに置き換える。
+- `EMAIL`に、自分のGitHubアカウントのメールアドレスを設定する。設定後に`echo $EMAIL`で値を確認する。
 - 既にSSH鍵を使っている場合は、新規作成の前に指導者へ確認する。上書きを求められた場合は`n`で中止する。
 
 ```bash
-ssh-keygen -t ed25519 -C "taro@example.com"
+export EMAIL="<email>"
+echo $EMAIL
+ssh-keygen -t ed25519 -C "$EMAIL"
 ```
 
 質問には、次の順に回答する。
 
 1. `Enter file in which to save the key`：Enterを押し、標準の保存先を使う。
-2. `Enter passphrase`：鍵を保護するためのパスフレーズを入力する。
-3. `Enter same passphrase again`：同じパスフレーズを再入力する。
+2. `Enter passphrase`：何も入力せずEnterを押す。
+3. `Enter same passphrase again`：何も入力せずEnterを押す。
 
-- パスフレーズは自分で決める。入力中の文字は表示されない。
+- パスフレーズは設定しない。
 - 次の2ファイルが作成される。
 
 | 種類   | ファイル                |
@@ -121,17 +123,18 @@ ssh-keygen -t ed25519 -C "taro@example.com"
 
 ### 公開鍵をGitHubに登録する
 
-1. Ubuntuのターミナルで公開鍵を表示する。
+1. Ubuntuのターミナルで公開鍵とTitle用の名前を表示する。
 
    ```bash
    cat ~/.ssh/id_ed25519.pub
+   echo "$(whoami)@$(hostname)"
    ```
 
-2. 表示された`ssh-ed25519`から始まる1行全体をコピーする。コマンドやターミナルのプロンプトは含めない。
+2. 表示された公開鍵（`ssh-ed25519`から始まる1行全体）と、Title用の名前（`username@host`形式）をそれぞれコピーする。コマンドやターミナルのプロンプトは含めない。
 3. ブラウザで[GitHubのSSH鍵設定](https://github.com/settings/keys)を開く。
 4. **New SSH key**を選び、以下を入力する。
 
-   - **Title**：`開発用PC Ubuntu`など、どの環境の鍵か分かる名前。
+   - **Title**：手順1で表示した`username@host`形式の名前。
    - **Key type**：`Authentication Key`。
    - **Key**：コピーした公開鍵の1行全体。
 
@@ -146,20 +149,20 @@ ssh-keygen -t ed25519 -C "taro@example.com"
    ssh-add ~/.ssh/id_ed25519
    ```
 
-   - パスフレーズを求められたら、SSH鍵の作成時に決めたものを入力する。
+   - パスフレーズは設定していないため、入力は求められない。
    - この読み込みは現在の作業用である。Ubuntuを再起動した後は、接続前に上記の2コマンドを実行する。
 
-2. GitHubへ接続する。
+2. 次のコマンドで、GitHubへのSSH接続を確認する。
 
    ```bash
    ssh -T git@github.com
    ```
 
 3. 初回に接続先の確認が表示されたら、表示されたフィンガープリントが[GitHub公式の値](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints)と一致することを確認し、`yes`を入力する。
-4. 次のメッセージの`USERNAME`が自分のGitHubユーザー名になっていることを確認する。
+4. 次のメッセージの`<username>`が自分のGitHubユーザー名になっていることを確認する。
 
    ```text
-   Hi USERNAME! You've successfully authenticated, but GitHub does not provide shell access.
+   Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
    ```
 
 - **成功の判断**：`successfully authenticated`が表示されれば認証成功である。`does not provide shell access`はエラーではない。
@@ -167,12 +170,12 @@ ssh-keygen -t ed25519 -C "taro@example.com"
 
 ### SSHでdotfilesをクローンする
 
-- `YOUR_GITHUB_USERNAME`を、配布元または自分がフォークしたリポジトリの所有者名に置き換える。
+- `<github-username>`を、配布元または自分がフォークしたリポジトリの所有者名に置き換える。
 - 自分用の変更をGitHubで管理する場合は、先にブラウザ上でフォークする。
 - 以下をUbuntuのターミナルで実行する。chezmoiの事前インストールは不要である。
 
 ```bash
-git clone git@github.com:YOUR_GITHUB_USERNAME/dotfiles.git ~/dotfiles
+git clone git@github.com:<github-username>/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ```
 
@@ -182,14 +185,16 @@ cd ~/dotfiles
 ### 名前とメールアドレスを設定する
 
 - **実行場所**：Ubuntuのターミナル。
-- **書き換える箇所**：`山田 太郎`と`taro@example.com`を、自分の名前とGitで使用するメールアドレスに置き換える。
+- **書き換える箇所**：`<name>`と`<email>`を、自分の名前とGitで使用するメールアドレスに置き換える。
 - **実行タイミング**：初回のセットアップ時。既存の`chezmoi.toml`がある場合は、このコマンドで上書きしない。
 
 ```bash
 mkdir -p ~/.config/chezmoi
-echo '[data]' > ~/.config/chezmoi/chezmoi.toml
-echo 'name = "山田 太郎"' >> ~/.config/chezmoi/chezmoi.toml
-echo 'email = "taro@example.com"' >> ~/.config/chezmoi/chezmoi.toml
+cat > ~/.config/chezmoi/chezmoi.toml <<'EOF'
+[data]
+name = "<name>"
+email = "<email>"
+EOF
 ```
 
 - この操作で、個人設定ファイル`~/.config/chezmoi/chezmoi.toml`を作成する。
@@ -204,7 +209,7 @@ cat ~/.config/chezmoi/chezmoi.toml
 
 ```toml
 [data]
-name = "山田 太郎"
+name = "Taro Yamada"
 email = "taro@example.com"
 ```
 
@@ -246,7 +251,7 @@ bash bootstrap.sh
 ```
 
 - 更新後も「導入結果を確認する」を確認する。
-- 個人設定を作成する`echo`コマンドは、通常の更新では実行しない。
+- 個人設定を作成するコマンドは、通常の更新では実行しない。
 
 ## 困ったとき
 
