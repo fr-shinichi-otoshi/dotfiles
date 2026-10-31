@@ -29,7 +29,7 @@ WSL／Ubuntu向けのAI駆動開発環境を、chezmoi・mitamae・miseで管理
 ## ドキュメント
 
 - [セットアップ手順](docs/docs/getting-started.md)：前提条件、初回導入、更新、困ったときの対処。
-- [Dockerでの検証](docs/docs/docker-validation.md)：検証環境と確認項目。
+- [Dockerでの検証](docs/docs/docker-validation.md)：`Dockerfile`と`bash scripts/docker-validate.sh`による検証。
 - [管理・保守の方針](docs/docs/maintenance.md)：設定の構成、スクリプトの設計、整備計画。
 
 ドキュメントサイトは`docs/`に集約し、本文は`docs/docs/`で管理する。GitHub Pagesで公開するためのワークフローを用意している。
