@@ -1,0 +1,12 @@
+# 依存パッケージ
+node_modules/
+
+# キャッシュ
+.cache/
+
+# Docusaurusの生成ファイル・ビルド成果物
+.docusaurus/
+build/
+
+# ロックファイル
+pnpm-lock.yaml

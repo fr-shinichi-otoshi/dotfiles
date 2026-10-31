@@ -1,0 +1,30 @@
+version: 1
+rules:
+  - expected: GitHub
+    patterns:
+      - Github
+      - github
+    specs:
+      - from: Github
+        to: GitHub
+  - expected: Node.js
+    patterns:
+      - NodeJS
+      - Nodejs
+      - nodejs
+    specs:
+      - from: NodeJS
+        to: Node.js
+  - expected: textlint
+    patterns:
+      - Textlint
+      - TextLint
+      - Texlint
+    specs:
+      - from: Texlint
+        to: textlint
+  - expected: Docusaurus
+    pattern: docusaurus
+    specs:
+      - from: docusaurus
+        to: Docusaurus

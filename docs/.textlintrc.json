@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "preset-ja-technical-writing": {
+      "no-mix-dearu-desumasu": {
+        "preferInHeader": "である",
+        "preferInBody": "である",
+        "preferInList": "である"
+      }
+    },
+    "preset-ai-writing": {
+      "ai-tech-writing-guideline": {
+        "severity": "info"
+      }
+    },
+    "preset-ja-spacing": true,
+    "prh": {
+      "rulePaths": ["./prh.yml"],
+      "checkEmphasis": true
+    }
+  }
+}
