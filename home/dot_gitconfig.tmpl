@@ -1,0 +1,119 @@
+{{- if not .name -}}
+{{- fail "chezmoi.toml の data.name が未設定です" -}}
+{{- end -}}
+{{- if not .email -}}
+{{- fail "chezmoi.toml の data.email が未設定です" -}}
+{{- end -}}
+[user]
+	name = {{ .name | quote }}
+	email = {{ .email | quote }}
+
+[core]
+	pager = delta
+	editor = vim
+	autocrlf = input
+	eol = lf
+	quotepath = false
+	excludesfile = ~/.gitignore_global
+	whitespace = trailing-space,space-before-tab
+	preloadindex = true
+	untrackedCache = true
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+
+[init]
+	defaultBranch = main
+
+[color]
+	ui = auto
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = cyan bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+
+[color "status"]
+	added = green
+	changed = yellow
+	untracked = red
+
+[diff]
+	algorithm = histogram
+	colorMoved = default
+	renames = copies
+	mnemonicPrefix = true
+
+[merge]
+	conflictstyle = zdiff3
+
+[rebase]
+	autoStash = true
+	autoSquash = true
+	updateRefs = true
+
+[pull]
+	rebase = false
+
+[push]
+	default = simple
+	autoSetupRemote = true
+	followTags = true
+
+[fetch]
+	prune = true
+	pruneTags = true
+
+[branch]
+	autosetupmerge = always
+	sort = -committerdate
+
+[tag]
+	sort = version:refname
+
+[status]
+	showUntrackedFiles = all
+	submoduleSummary = true
+
+[help]
+	autocorrect = prompt
+
+[rerere]
+	enabled = true
+	autoupdate = true
+
+[credential]
+	helper = cache --timeout=28800
+
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	sw = switch
+	rs = restore
+	lg = log --oneline --decorate --graph --all
+	ll = log --oneline --decorate --graph
+	last = log -1 --stat
+	diffc = diff --cached
+	unstage = restore --staged
+	amend = commit --amend --no-edit
+	wip = commit -am "WIP"
+	fix = "!f() { git status --short; }; f"
+	root = rev-parse --show-toplevel
+	aliases = "!git config --get-regexp '^alias\\.' | sed 's/^alias\\.//;s/ / = /'"
+	stash-all = stash push --include-untracked
+	undo = reset --soft HEAD~1
+	please = push --force-with-lease
+	cleanup = "!git branch --merged | grep -vE '^\\*|main|master|develop' | xargs -r git branch -d"

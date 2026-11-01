@@ -21,7 +21,7 @@ WSL／Ubuntu向けのAI駆動開発環境を、chezmoi・mitamae・miseで管理
 
 | 層 | 担当 |
 | --- | --- |
-| snap / chezmoi | chezmoi本体の導入とホーム設定の配布（zsh / sheldon / starship / atuin / vim / mise設定） |
+| snap / chezmoi | chezmoi本体の導入とホーム設定の配布（zsh / sheldon / starship / atuin / vim / git / mise設定） |
 | `bootstrap.sh` | mitamaeの取得とレシピ実行、mise再install、sheldon lock |
 | mitamae | apt、Docker Engine（公式apt）、mise導入、bashrc PATH、ログインシェルをzshへ |
 | mise | CLIとランタイムの版管理（シェル系、Git系、node / terraform、herdr / hunk など） |
@@ -49,6 +49,6 @@ pnpm start
 ## 現在の状態
 
 - snapのchezmoi適用後にbootstrapでプロビジョニングする流れまで実装済みである。
-- zsh標準化と主要CLI（mise）、Docker Engine（公式apt）まで定義済みである。
-- Git共通設定テンプレートや秘密鍵運用は未整備である。
+- zsh標準化と主要CLI（mise）、Docker Engine（公式apt）、Git共通設定まで定義済みである。
+- 署名・秘密鍵運用は未整備である。
 - 詳細は[実装・検証状況](docs/docs/maintenance.md#実装検証状況)を参照する。

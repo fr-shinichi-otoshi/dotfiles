@@ -19,6 +19,10 @@ chezmoi apply --source="${PWD}"
 test -f "${HOME}/.config/mise/config.toml"
 test -f "${HOME}/.zshrc"
 test -f "${HOME}/.vimrc"
+test -f "${HOME}/.gitconfig"
+test -f "${HOME}/.gitignore_global"
+test "$(git config --global --get user.name)" = "Docker Validator"
+test "$(git config --global --get user.email)" = "docker-validator@example.com"
 echo mise_config_ok
 
 bash bootstrap.sh
@@ -32,6 +36,9 @@ getent passwd "${USER}" | cut -d: -f7 | grep -qx /usr/bin/zsh
 
 git --version
 git-lfs --version
+git config --global --get user.name
+git config --global --get user.email
+delta --version
 mise --version
 chezmoi --version
 gh --version

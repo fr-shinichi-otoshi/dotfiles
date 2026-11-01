@@ -2,7 +2,7 @@
 
 - **対象者**：新卒や、Linuxでの開発経験がないチームメンバー。
 - **進め方**：前提条件を確認し、初回セットアップを上から順に実行する。
-- **現在の状態**：snapのchezmoi適用後にbootstrapでプロビジョニングする流れまで実装済みである。Git設定などのアプリ設定の中身は未整備である。[実装・検証状況](maintenance.md#実装検証状況)を確認してから利用する。
+- **現在の状態**：snapのchezmoi適用後にbootstrapでプロビジョニングする流れまで実装済みである。Git共通設定（署名以外）も配布する。署名・鍵運用は未整備である。[実装・検証状況](maintenance.md#実装検証状況)を確認してから利用する。
 
 ## 前提条件
 
@@ -233,10 +233,10 @@ chezmoi init --source="$PWD"
 chezmoi apply --source="$PWD"
 ```
 
-- **確認結果**：`~/.config/mise/config.toml`と`~/.zshrc`と`~/.vimrc`が存在すること。
+- **確認結果**：`~/.config/mise/config.toml`と`~/.zshrc`と`~/.vimrc`と`~/.gitconfig`と`~/.gitignore_global`が存在すること。
 
 ```bash
-test -f ~/.config/mise/config.toml && test -f ~/.zshrc && test -f ~/.vimrc && echo ok
+test -f ~/.config/mise/config.toml && test -f ~/.zshrc && test -f ~/.vimrc && test -f ~/.gitconfig && test -f ~/.gitignore_global && echo ok
 ```
 
 - 個人設定（name / email）が無いと、以降の手順で困る場合がある。適用前に`chezmoi.toml`を確認する。
@@ -263,6 +263,9 @@ bash bootstrap.sh
 getent passwd "$USER" | cut -d: -f7
 git --version
 git-lfs --version
+git config --global --get user.name
+git config --global --get user.email
+delta --version
 mise --version
 chezmoi --version
 gh --version
@@ -290,6 +293,7 @@ herdr --version
 hunk --version
 docker --version
 vim --version | head -n 1
+test -f ~/.gitconfig && test -f ~/.gitignore_global && echo gitconfig_ok
 chezmoi diff
 ```
 

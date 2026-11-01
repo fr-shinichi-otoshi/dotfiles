@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# エディタ / IDE（個人環境）
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# 一時・ローカル秘密
+*.tmp
+*.temp
+.env.local
+.env.*.local

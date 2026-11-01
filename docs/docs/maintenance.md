@@ -58,7 +58,7 @@ miseで入れる主なCLIは次のとおりである。
 
 - 既存: `gh` / `sops` / `age`
 - シェル: `fzf` / `ripgrep` / `fd` / `eza` / `sheldon` / `starship` / `atuin`
-- Git: `lazygit` / `lefthook`（`gitui`は入れない）
+- Git: `lazygit` / `lefthook` / `delta`（`gitui`は入れない）
 - ランタイム: `node` / `uv` / `terraform` / `tflint` / `terraform-docs`
 - 追加: `broot` / `gping` / `ripgrep-all` / `lazydocker`
 - エージェント／レビュー: `herdr` / `hunk`
@@ -91,6 +91,7 @@ dotfiles/
 ├── home/                     # ホームディレクトリへ適用するソース
 │   ├── dot_zshenv / dot_zshrc / dot_zsh_aliases
 │   ├── dot_vimrc
+│   ├── dot_gitconfig.tmpl / dot_gitignore_global
 │   └── dot_config/{mise,sheldon,starship,atuin}/
 ├── docs/
 └── templates/                # プロジェクト用のひな形（今後）
@@ -164,10 +165,10 @@ bash bootstrap.sh
 | chezmoi（snap）        | 手順化済み（bootstrap外）                         |
 | bootstrap.sh           | 実装済み（プロビジョニング専用）                  |
 | mitamaeレシピ          | 実装済み（apt / Docker / mise / PATH / zsh）      |
-| miseツール定義         | 実装済み（シェル・Git・ランタイム・herdr / hunk） |
+| miseツール定義         | 実装済み（シェル・Git・delta・ランタイム・herdr / hunk） |
 | chezmoiシェル設定      | 実装済み（zsh / sheldon / starship / atuin）      |
 | chezmoi Vim設定        | 実装済み（`.vimrc` + vim-plug 自動導入）          |
-| 共通アプリ設定         | 一部未実装（gitconfig、鍵運用など）               |
+| 共通アプリ設定         | Git設定テンプレート実装済み（署名・鍵運用は未整備） |
 | update.sh              | 未実装（範囲外）                                  |
 | Docker検証・自動化     | 手順更新済み。今回変更の再検証は未実施            |
 | WSL／Ubuntu実機検証    | 未実施                                            |
@@ -175,8 +176,7 @@ bash bootstrap.sh
 ## 今後の整備順序
 
 1. **実環境・Dockerでの検証**：snap → apply → bootstrap の初回・再実行を確認する。
-2. **共通設定の追加**：Git設定テンプレートなど、ホームに配布する設定を追加する。
-3. **秘密情報の扱い**：age / sops の鍵配置と運用を定める。
-4. **日常更新**：必要なら`update.sh`を追加する。
+2. **秘密情報の扱い**：age / sops の鍵配置と運用を定める。
+3. **日常更新**：必要なら`update.sh`を追加する。
 
 [セットアップ手順へ](getting-started.md)
