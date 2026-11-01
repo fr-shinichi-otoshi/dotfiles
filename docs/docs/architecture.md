@@ -40,6 +40,7 @@
 | ---------------------- | ------------------------ | ---------------------------------------------------- |
 | snap / chezmoi         | 設定配布の入口           | chezmoi導入、`init` / `apply`                        |
 | `scripts/bootstrap.sh` | プロビジョニング入口     | mitamae取得、レシピ実行、mise再install、sheldon lock |
+| `scripts/update.sh`    | 日常更新入口             | apt更新、mise版バンプ、sheldon更新                   |
 | mitamae                | マシンのプロビジョニング | apt、Docker Engine、mise導入、bashrc PATH、chsh→zsh  |
 | mise                   | CLI / ランタイムの版管理 | シェル系、Git系、node / terraform、herdr / hunk など |
 
@@ -88,7 +89,7 @@ dotfiles/
 ├── README.md
 ├── scripts/                  # 利用者向け入口
 │   ├── bootstrap.sh          # プロビジョニングの入口
-│   └── update.sh             # 日常更新（今後）
+│   └── update.sh             # 日常更新（apt / mise / sheldon）
 ├── docker/                   # 整備者向け Docker 検証
 │   └── docker-validate*.sh
 ├── .chezmoiroot              # 内容をhomeとし、管理対象のルートを指定
@@ -115,9 +116,18 @@ dotfiles/
 - **前提**：snapでchezmoiを導入し、このリポジトリをsourceにして`chezmoi apply`済みであること。
 - **入口**：リポジトリ直下で`bash scripts/bootstrap.sh`を実行します。
 - **担当する処理**：mitamaeの取得、レシピ実行、miseの再install、sheldon lock。
-- **担当しない処理**：chezmoiのinstall/init/apply。日常更新用の`scripts/update.sh`は別途（未実装）。
+- **担当しない処理**：chezmoiのinstall/init/apply。日常更新は`scripts/update.sh`。
 - **再実行**：導入済みのツールを考慮して処理します。
 - **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、`scripts/bootstrap.sh`では扱いません。
+
+## update.shの設計
+
+- **実行ユーザー**：sudoを実行できる一般ユーザー。
+- **前提**：getting-startedと`scripts/bootstrap.sh`が完了していること。
+- **入口**：リポジトリ直下で`bash scripts/update.sh`を実行します。
+- **担当する処理**：aptの`update` / `upgrade`、`mise upgrade --bump`、sheldon lock。
+- **担当しない処理**：chezmoiのinstall/init/apply、mitamae、`scripts/bootstrap.sh`。
+- **版の扱い**：`--bump`は`~/.config/mise/config.toml`を書き換えることがあります。共有する版の正はリポジトリの`home/dot_config/mise/config.toml`です。取り込み手順は[設定の変更手順](maintenance.md#cliの版を上げて共有する)です。
 
 ## 実装・検証状況
 
@@ -126,12 +136,12 @@ dotfiles/
 | 導入手順             | 記載済み。整備者検証はDockerのみ                            |
 | chezmoi（snap）      | 手順化済み（bootstrap外）。Docker検証ではバイナリ同梱で代替 |
 | scripts/bootstrap.sh | 実装済み（プロビジョニング専用）                            |
+| scripts/update.sh    | 実装済み（apt / mise bump / sheldon）                       |
 | mitamaeレシピ        | 実装済み（apt / Docker / mise / PATH / zsh）                |
 | miseツール定義       | 実装済み（シェル・Git・delta・ランタイム・herdr / hunk）    |
 | chezmoiシェル設定    | 実装済み（zsh / sheldon / starship / atuin）                |
 | chezmoi Vim設定      | 実装済み（`.vimrc` + vim-plug 自動導入）                    |
 | 共通アプリ設定       | Git設定テンプレート実装済み（署名・鍵運用は未整備）         |
-| scripts/update.sh    | 未実装（範囲外）                                            |
 | Docker検証・自動化   | 検証の正。手順あり（変更後は再実行して確認）                |
 | WSL／Ubuntu実機検証  | 対象外（余力のある実機がない）                              |
 
@@ -139,6 +149,5 @@ dotfiles/
 
 1. **Dockerでの検証**：変更後は`bash docker/docker-validate.sh`で初回・再実行を確認します。
 2. **秘密情報の扱い**：age/sopsの鍵配置と運用を定めます。
-3. **日常更新**：必要なら`scripts/update.sh`を追加します。
 
 snapのchezmoi・対話的sudo・WSL連携・GUI・実アカウント認証はDockerでは再現しません。利用者向け手順は[セットアップ](getting-started.md)に残し、整備者の検証対象外とします。

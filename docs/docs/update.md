@@ -5,6 +5,23 @@
 - ローカルでファイルを変更している場合は、先に管理者と変更内容を確認します。
 - 個人設定（`chezmoi.toml`）の再作成は不要です。
 
+## 日常の apt / mise / sheldon 更新
+
+パッケージとCLI、zshプラグインだけを更新します。配布元の取り込みは不要なときに使います。
+
+```bash
+cd ~/dotfiles
+bash scripts/update.sh
+```
+
+- aptを更新し、miseツールを`mise upgrade --bump`で版バンプし、sheldonを更新します。
+- `~/.config/mise/config.toml`が書き換わることがあります。版をリポジトリと共有したい場合は、整備者向けの[設定の変更手順](maintenance.md#cliの版を上げて共有する)を使います。
+- このあと`chezmoi apply`を実行すると、リポジトリ側の版に戻ります。
+
+更新後は新しいターミナルを開くか`exec zsh`を実行します。
+
+## 配布元の取り込み
+
 配布元の変更を自分のフォークへ取り込む場合の例です。初回だけ`upstream`を登録します。
 
 ```bash

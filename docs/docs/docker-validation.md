@@ -21,6 +21,7 @@ wsl -e bash -lc 'cd /mnt/c/Users/<you>/develop/dotfiles && bash docker/docker-va
 - [ ] 主要CLIと`docker`が起動できます
 - [ ] `chezmoi diff`に意図しない差分が残りません
 - [ ] `scripts/bootstrap.sh`の再実行が致命的に失敗しません
+- [ ] `scripts/update.sh`が致命的に失敗しません
 - [ ] マウントしたSSH鍵で`ssh -T git@github.com`が成功します
 
 `hello-world`はDinD制限で失敗することがあります。警告のみで続行します。

@@ -78,6 +78,19 @@ echo tools_ok
 bash scripts/bootstrap.sh
 echo bootstrap_second_ok
 
+bash scripts/update.sh
+echo update_ok
+
+# update.sh の --bump で書き換わった版をソースへ同期し、意図しない差分がないことを確認する。
+chezmoi add --source="${HOME}/dotfiles-work" "${HOME}/.config/mise/config.toml"
+eval "$("${HOME}/.local/bin/mise" activate bash)"
+mise --version
+gh --version
+sheldon --version
+node --version
+chezmoi diff --source="${HOME}/dotfiles-work"
+echo update_tools_ok
+
 set +e
 ssh_out="$(ssh -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1)"
 ssh_rc=$?
