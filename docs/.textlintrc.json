@@ -2,9 +2,9 @@
   "rules": {
     "preset-ja-technical-writing": {
       "no-mix-dearu-desumasu": {
-        "preferInHeader": "である",
-        "preferInBody": "である",
-        "preferInList": "である"
+        "preferInHeader": "ですます",
+        "preferInBody": "ですます",
+        "preferInList": "ですます"
       }
     },
     "preset-ai-writing": {
@@ -14,7 +14,9 @@
     },
     "preset-ja-spacing": true,
     "prh": {
-      "rulePaths": ["./prh.yml"],
+      "rulePaths": [
+        "./prh.yml"
+      ],
       "checkEmphasis": true
     }
   }

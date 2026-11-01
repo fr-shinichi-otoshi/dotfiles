@@ -2,8 +2,8 @@
 
 ## 対象環境
 
-- **開発環境**：WSL2上のUbuntu、またはLinuxのUbuntu。Ubuntu 24.04 LTSを検証基準とする。
-- **検証環境**：整備者向けの検証はDockerのみとする。余力のある実機（WSL／Ubuntu）がないため、実機検証は行わない。
+- **開発環境**：WSL2上のUbuntu、またはLinuxのUbuntu。Ubuntu 24.04 LTSを検証基準とします。
+- **検証環境**：整備者向けの検証はDockerのみとします。余力のある実機（WSL／Ubuntu）がないため、実機検証は行いません。
 - **検証の正**：`ubuntu:24.04`相当のsystemd有効Dockerコンテナで、導入処理と設定の初回適用・再適用を確認する（`bash docker/docker-validate.sh`）。
 
 ## 設定の管理場所
@@ -18,19 +18,19 @@
 
 - プロジェクト固有の依存関係とビルド手順。
 - プロジェクト固有のAI指示。
-- lefthookのフック定義（`lefthook.yml`）。dotfilesはlefthookバイナリのみ入れる。
+- lefthookのフック定義（`lefthook.yml`）。dotfilesはlefthookバイナリのみ入れます。
 
 ### 各自で管理するもの
 
 - **個人設定**：Gitの名前・メールアドレス、環境ごとの値。
-- **認証情報**：APIキー、アクセストークン、SSH秘密鍵。各自の認証管理先に保持する。
+- **認証情報**：APIキー、アクセストークン、SSH秘密鍵。各自の認証管理先に保持します。
 
 ### 共通化のルール
 
-- 個人差のある設定は、chezmoiのテンプレートで共通部分と分離する。
-- 利用者は`echo`コマンドで名前・メールアドレスの設定ファイルを作成する。テンプレートの作成・保守は整備者が担当する。
-- 認証情報はリポジトリにコミットしない。
-- ホーム配下のドットファイルはchezmoiのみが管理する。mitamaeはプロビジョニングに限定する。
+- 個人差のある設定は、chezmoiのテンプレートで共通部分と分離します。
+- 利用者は`echo`コマンドで名前・メールアドレスの設定ファイルを作成します。テンプレートの作成・保守は整備者が担当します。
+- 認証情報はリポジトリにコミットしません。
+- ホーム配下のドットファイルはchezmoiのみが管理します。mitamaeはプロビジョニングに限定します。
 
 ## 導入のレイヤ
 
@@ -55,7 +55,7 @@
 | Docker Engine          | 公式aptリポジトリ（mitamae） | stableチャネル                                      |
 | CLI一式                | mise                         | `home/dot_config/mise/config.toml`が正              |
 
-miseで入れる主なCLIは次のとおりである。
+miseで入れる主なCLIは次のとおりです。
 
 - 既存: `gh`/`sops`/`age`
 - シェル: `fzf`/`ripgrep`/`fd`/`eza`/`sheldon`/`starship`/`atuin`
@@ -64,13 +64,13 @@ miseで入れる主なCLIは次のとおりである。
 - 追加: `broot`/`gping`/`ripgrep-all`/`lazydocker`
 - エージェント／レビュー: `herdr`/`hunk`
 
-CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正である。chezmoiとDocker Engineはmiseでは管理しない。
+CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正です。chezmoiとDocker Engineはmiseでは管理しません。
 
 ## chezmoiとプロジェクトの関係
 
-- chezmoiが`home/`配下のソースから設定ファイルを生成し、ホームディレクトリへ配置する。
-- 各プロジェクトは、ホームに配置された共通設定を利用する。
-- プロジェクト用のひな形は、必要なプロジェクトへ明示的にコピーする。
+- chezmoiが`home/`配下のソースから設定ファイルを生成し、ホームディレクトリへ配置します。
+- 各プロジェクトは、ホームに配置された共通設定を利用します。
+- プロジェクト用のひな形は、必要なプロジェクトへ明示的にコピーします。
 
 ```text
 ~/dotfiles/              # Gitで取得するこのリポジトリ
@@ -102,56 +102,56 @@ dotfiles/
 └── templates/                # プロジェクト用のひな形（今後）
 ```
 
-- **読み込み先**：リポジトリ直下の`.chezmoiroot`に`home`を記載し、`home/`を管理対象のルートにする。
-- **配置の対応**：`home/dot_config/`は`~/.config/`に対応する。
-- **開発用ファイル**：README、`docs/`、`mitamae/`、`scripts/`、`docker/`は`home/`の外に置き、ホームへの配置対象から分離する。
-- **既存ファイルの扱い**：`.agent/`、`.cursor/`、`CLAUDE.md`は、リポジトリ開発用ならルートに残し、配布する設定のみchezmoiの命名規則に従って`home/`配下へ追加する。
+- **読み込み先**：リポジトリ直下の`.chezmoiroot`に`home`を記載し、`home/`を管理対象のルートにします。
+- **配置の対応**：`home/dot_config/`は`~/.config/`に対応します。
+- **開発用ファイル**：README、`docs/`、`mitamae/`、`scripts/`、`docker/`は`home/`の外に置き、ホームへの配置対象から分離します。
+- **既存ファイルの扱い**：`.agent/`、`.cursor/`、`CLAUDE.md`は、リポジトリ開発用ならルートに残し、配布する設定のみchezmoiの命名規則に従って`home/`配下へ追加します。
 
 ## bootstrap.shの設計
 
 - **実行ユーザー**：sudoを実行できる一般ユーザー。
-- **前提**：snapでchezmoiを導入し、このリポジトリをsourceにして`chezmoi apply`済みであること。
-- **入口**：リポジトリ直下で`bash scripts/bootstrap.sh`を実行する。
+- **前提**：snapでchezmoiを導入し、このリポジトリをsourceにして`chezmoi apply`済みである必要があります。
+- **入口**：リポジトリ直下で`bash scripts/bootstrap.sh`を実行します。
 - **担当する処理**：mitamaeの取得、レシピ実行、miseの再install、sheldon lock。
 - **担当しない処理**：chezmoiのinstall/init/apply。日常更新用の`scripts/update.sh`は別途（未実装）。
-- **再実行**：導入済みのツールを考慮して処理する。
-- **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、`scripts/bootstrap.sh`では扱わない。
+- **再実行**：導入済みのツールを考慮して処理します。
+- **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、`scripts/bootstrap.sh`では扱いません。
 
 ## 運用：設定の変更と更新
 
 ### 管理対象を追加する
 
-1. 対象ファイルをchezmoiに登録する。以下はGit設定の例である。
+1. 対象ファイルをchezmoiに登録します。以下はGit設定の例です。
 
    ```bash
    chezmoi add ~/.gitconfig
    ```
 
-2. ソース側の差分を確認する。
+2. ソース側の差分を確認します。
 
    ```bash
    chezmoi cd
    git diff
    ```
 
-3. 個人情報・認証情報を除き、個人差はテンプレートに切り出す。
-4. Dockerで検証した後、変更をコミット・プッシュする。
+3. 個人情報・認証情報を除き、個人差はテンプレートに切り出します。
+4. Dockerで検証した後、変更をコミット・プッシュします。
 
 ### CLIを追加する
 
-1. `home/dot_config/mise/config.toml`の`[tools]`へ版を追加する。
-2. `chezmoi apply`のあと`bash scripts/bootstrap.sh`を再実行する。または`mise install`を実行する。
+1. `home/dot_config/mise/config.toml`の`[tools]`へ版を追加します。
+2. `chezmoi apply`のあと`bash scripts/bootstrap.sh`を再実行します。または`mise install`を実行します。
 
 ### aptパッケージを追加する
 
-1. `mitamae/roles/apt.rb`へパッケージ名を追加する。
-2. `bash scripts/bootstrap.sh`を再実行する。
+1. `mitamae/roles/apt.rb`へパッケージ名を追加します。
+2. `bash scripts/bootstrap.sh`を再実行します。
 
 ### リモートの更新を適用する
 
-- **直接利用の場合**：取得元のリポジトリを更新する。
-- **フォークの場合**：配布元の変更を自分のフォークへ取り込んでから更新する。
-- **ローカル変更がある場合**：コミットや競合解消など、Git側の整理を先に行う。
+- **直接利用の場合**：取得元のリポジトリを更新します。
+- **フォークの場合**：配布元の変更を自分のフォークへ取り込んでから更新します。
+- **ローカル変更がある場合**：コミットや競合解消など、Git側の整理を先に行います。
 
 ```bash
 cd ~/dotfiles
@@ -160,7 +160,7 @@ chezmoi apply --source="$PWD"
 bash scripts/bootstrap.sh
 ```
 
-- 更新後は新しいターミナルを開き、[導入結果を確認する](getting-started.md#導入結果を確認する)を確認する。
+- 更新後は新しいターミナルを開き、[導入結果を確認する](getting-started.md#導入結果を確認する)を確認します。
 
 ## 実装・検証状況
 
@@ -180,10 +180,10 @@ bash scripts/bootstrap.sh
 
 ## 今後の整備順序
 
-1. **Dockerでの検証**：変更後は`bash docker/docker-validate.sh`で初回・再実行を確認する。
-2. **秘密情報の扱い**：age/sopsの鍵配置と運用を定める。
-3. **日常更新**：必要なら`scripts/update.sh`を追加する。
+1. **Dockerでの検証**：変更後は`bash docker/docker-validate.sh`で初回・再実行を確認します。
+2. **秘密情報の扱い**：age/sopsの鍵配置と運用を定めます。
+3. **日常更新**：必要なら`scripts/update.sh`を追加します。
 
-snapのchezmoi・対話的sudo・WSL連携・GUI・実アカウント認証はDockerでは再現しない。利用者向け手順としては[セットアップ手順](getting-started.md)に残し、整備者の検証対象外とする。
+snapのchezmoi・対話的sudo・WSL連携・GUI・実アカウント認証はDockerでは再現しません。利用者向け手順としては[セットアップ手順](getting-started.md)に残し、整備者の検証対象外とします。
 
 [セットアップ手順へ](getting-started.md)
