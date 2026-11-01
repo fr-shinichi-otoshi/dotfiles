@@ -5,7 +5,7 @@
 - **位置づけ**：整備者向けの検証の正である。余力のある実機がないため、WSL／Ubuntu実機での検証は行わない。
 - **目的**：ホストのホーム設定を変更せず、初回構築・再適用・GitHub SSH認証を確認する。
 - **対象**：ローカルのdotfilesリポジトリ。未コミット・未プッシュの変更も含む。
-- **流れ**：検証用イメージを build → コンテナ起動 → `chezmoi apply` → `bin/bootstrap.sh` → `ssh -T git@github.com`。
+- **流れ**：検証用イメージを build → コンテナ起動 → `chezmoi apply` → `scripts/bootstrap.sh` → `ssh -T git@github.com`。
 - **ソース**：リポジトリはバインドマウントする。GitHubからのクローンは行わない。
 - **SSH**：ホストの`~/.ssh`をread-onlyでマウントし、認証だけ確認する。
 - **前提**：Dockerが起動済みであり、`docker version`でサーバーへ接続できること。
@@ -17,7 +17,7 @@
 ホスト側でdotfilesリポジトリのルートに移動して実行する。
 
 ```bash
-bash bin/docker-validate.sh
+bash docker/docker-validate.sh
 ```
 
 このスクリプトが次を行う。
@@ -32,7 +32,7 @@ bash bin/docker-validate.sh
 Windows（PowerShell）から同じことをする場合の例:
 
 ```powershell
-wsl -e bash -lc 'cd /mnt/c/Users/<you>/develop/dotfiles && bash bin/docker-validate.sh'
+wsl -e bash -lc 'cd /mnt/c/Users/<you>/develop/dotfiles && bash docker/docker-validate.sh'
 ```
 
 または Git Bash など bash が使える環境でリポジトリルートから実行する。
@@ -50,11 +50,11 @@ docker exec -it -u developer -w /home/developer \
 
 ## 合格条件
 
-- [ ] `bash bin/docker-validate.sh`が`ALL_CHECKS_PASSED`で終了する。
+- [ ] `bash docker/docker-validate.sh`が`ALL_CHECKS_PASSED`で終了する。
 - [ ] ログインシェルが`/usr/bin/zsh`になる。
 - [ ] 主要CLIと`docker`が起動できる。
 - [ ] `chezmoi diff`に意図しない差分が残らない。
-- [ ] `bin/bootstrap.sh`の再実行が致命的に失敗しない。
+- [ ] `scripts/bootstrap.sh`の再実行が致命的に失敗しない。
 - [ ] マウントしたSSH鍵で`ssh -T git@github.com`が成功する。
 
 `hello-world`は検証コンテナ内のDocker-in-Docker制限で失敗しうる。失敗しても検証スクリプトは続行し、警告のみ出す。
@@ -65,7 +65,7 @@ docker exec -it -u developer -w /home/developer \
 docker rm -f dotfiles-check
 ```
 
-再検証は`bash bin/docker-validate.sh`を再実行する（既存コンテナはスクリプトが削除する）。
+再検証は`bash docker/docker-validate.sh`を再実行する（既存コンテナはスクリプトが削除する）。
 
 ## Docker検証の対象外
 

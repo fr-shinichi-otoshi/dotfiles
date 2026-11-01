@@ -11,7 +11,7 @@ title: はじめに
 
 ## まず読むページ
 
-- [セットアップ手順](getting-started.md)：前提条件の確認から、SSH認証、クローン、chezmoi適用、`bin/bootstrap.sh`の実行までを扱う。
+- [セットアップ手順](getting-started.md)：前提条件の確認から、SSH認証、クローン、chezmoi適用、`scripts/bootstrap.sh`の実行までを扱う。
 - コマンドは上から順に実行する。chezmoiの仕組みは、初回導入時に理解する必要はない。
 
 ## 現在の状態

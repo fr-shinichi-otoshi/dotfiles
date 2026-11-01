@@ -126,7 +126,7 @@ refresh_sheldon() {
 }
 
 main() {
-  [[ "$(id -u)" -ne 0 ]] || error "root では実行しない。一般ユーザーで bash bin/bootstrap.sh を実行する"
+  [[ "$(id -u)" -ne 0 ]] || error "root では実行しない。一般ユーザーで bash scripts/bootstrap.sh を実行する"
   [[ -f "${ROOT_DIR}/.chezmoiroot" ]] || error "${ROOT_DIR} は dotfiles リポジトリではない"
 
   require_prerequisites

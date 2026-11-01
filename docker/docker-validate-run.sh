@@ -25,7 +25,7 @@ test "$(git config --global --get user.name)" = "Docker Validator"
 test "$(git config --global --get user.email)" = "docker-validator@example.com"
 echo mise_config_ok
 
-bash bin/bootstrap.sh
+bash scripts/bootstrap.sh
 echo bootstrap_first_ok
 
 # shellcheck disable=SC1090
@@ -75,7 +75,7 @@ fi
 chezmoi diff --source="${HOME}/dotfiles-work"
 echo tools_ok
 
-bash bin/bootstrap.sh
+bash scripts/bootstrap.sh
 echo bootstrap_second_ok
 
 set +e

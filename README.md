@@ -13,7 +13,7 @@ WSL／Ubuntu向けのAI駆動開発環境を、chezmoi・mitamae・miseで管理
 3. SSH接続を確認し、リポジトリをクローンする。
 4. `echo`で個人設定を作成する。
 5. snapでchezmoiを導入し、設定を適用する。
-6. `bash bin/bootstrap.sh`を実行する。
+6. `bash scripts/bootstrap.sh`を実行する。
 
 前提条件とコマンドは、[セットアップ手順](docs/docs/getting-started.md)を参照する。
 
@@ -22,14 +22,14 @@ WSL／Ubuntu向けのAI駆動開発環境を、chezmoi・mitamae・miseで管理
 | 層 | 担当 |
 | --- | --- |
 | snap / chezmoi | chezmoi本体の導入とホーム設定の配布（zsh / sheldon / starship / atuin / vim / git / mise設定） |
-| `bin/bootstrap.sh` | mitamaeの取得とレシピ実行、mise再install、sheldon lock |
+| `scripts/bootstrap.sh` | mitamaeの取得とレシピ実行、mise再install、sheldon lock |
 | mitamae | apt、Docker Engine（公式apt）、mise導入、bashrc PATH、ログインシェルをzshへ |
 | mise | CLIとランタイムの版管理（シェル系、Git系、node / terraform、herdr / hunk など） |
 
 ## ドキュメント
 
 - [セットアップ手順](docs/docs/getting-started.md)：前提条件、初回導入、更新、困ったときの対処。
-- [Dockerでの検証](docs/docs/docker-validation.md)：整備者向け検証の正。`Dockerfile`と`bash bin/docker-validate.sh`による。
+- [Dockerでの検証](docs/docs/docker-validation.md)：整備者向け検証の正。`Dockerfile`と`bash docker/docker-validate.sh`による。
 - [管理・保守の方針](docs/docs/maintenance.md)：設定の構成、スクリプトの設計、整備計画。
 
 ドキュメントサイトは`docs/`に集約し、本文は`docs/docs/`で管理する。GitHub Pagesで公開するためのワークフローを用意している。

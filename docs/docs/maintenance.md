@@ -4,7 +4,7 @@
 
 - **開発環境**：WSL2上のUbuntu、またはLinuxのUbuntu。Ubuntu 24.04 LTSを検証基準とする。
 - **検証環境**：整備者向けの検証はDockerのみとする。余力のある実機（WSL／Ubuntu）がないため、実機検証は行わない。
-- **検証の正**：`ubuntu:24.04`相当のsystemd有効Dockerコンテナで、導入処理と設定の初回適用・再適用を確認する（`bash bin/docker-validate.sh`）。
+- **検証の正**：`ubuntu:24.04`相当のsystemd有効Dockerコンテナで、導入処理と設定の初回適用・再適用を確認する（`bash docker/docker-validate.sh`）。
 
 ## 設定の管理場所
 
@@ -37,7 +37,7 @@
 | 層 | 役割 | 主な対象 |
 | --- | --- | --- |
 | snap / chezmoi | 設定配布の入口 | chezmoi導入、`init` / `apply` |
-| `bin/bootstrap.sh` | プロビジョニング入口 | mitamae取得、レシピ実行、mise再install、sheldon lock |
+| `scripts/bootstrap.sh` | プロビジョニング入口 | mitamae取得、レシピ実行、mise再install、sheldon lock |
 | mitamae | マシンのプロビジョニング | apt、Docker Engine、mise導入、bashrc PATH、chsh→zsh |
 | mise | CLI / ランタイムの版管理 | シェル系、Git系、node / terraform、herdr / hunk など |
 
@@ -84,10 +84,11 @@ CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正である�
 ```text
 dotfiles/
 ├── README.md
-├── bin/                      # 入口・検証スクリプト
+├── scripts/                  # 利用者向け入口
 │   ├── bootstrap.sh          # プロビジョニングの入口
-│   ├── update.sh             # 日常更新（今後）
-│   └── docker-validate*.sh   # Docker検証
+│   └── update.sh             # 日常更新（今後）
+├── docker/                   # 整備者向け Docker 検証
+│   └── docker-validate*.sh
 ├── .chezmoiroot              # 内容をhomeとし、管理対象のルートを指定
 ├── mitamae/                  # プロビジョニング用レシピ
 │   ├── recipes/default.rb
@@ -103,18 +104,18 @@ dotfiles/
 
 - **読み込み先**：リポジトリ直下の`.chezmoiroot`に`home`を記載し、`home/`を管理対象のルートにする。
 - **配置の対応**：`home/dot_config/`は`~/.config/`に対応する。
-- **開発用ファイル**：README、`docs/`、`mitamae/`、`bin/`は`home/`の外に置き、ホームへの配置対象から分離する。
+- **開発用ファイル**：README、`docs/`、`mitamae/`、`scripts/`、`docker/`は`home/`の外に置き、ホームへの配置対象から分離する。
 - **既存ファイルの扱い**：`.agent/`、`.cursor/`、`CLAUDE.md`は、リポジトリ開発用ならルートに残し、配布する設定のみchezmoiの命名規則に従って`home/`配下へ追加する。
 
 ## bootstrap.shの設計
 
 - **実行ユーザー**：sudoを実行できる一般ユーザー。
 - **前提**：snapでchezmoiを導入し、このリポジトリをsourceにして`chezmoi apply`済みであること。
-- **入口**：リポジトリ直下で`bash bin/bootstrap.sh`を実行する。
+- **入口**：リポジトリ直下で`bash scripts/bootstrap.sh`を実行する。
 - **担当する処理**：mitamaeの取得、レシピ実行、miseの再install、sheldon lock。
-- **担当しない処理**：chezmoiのinstall / init / apply。日常更新用の`bin/update.sh`は別途（未実装）。
+- **担当しない処理**：chezmoiのinstall / init / apply。日常更新用の`scripts/update.sh`は別途（未実装）。
 - **再実行**：導入済みのツールを考慮して処理する。
-- **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、`bin/bootstrap.sh`では扱わない。
+- **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、`scripts/bootstrap.sh`では扱わない。
 
 ## 運用：設定の変更と更新
 
@@ -139,12 +140,12 @@ dotfiles/
 ### CLIを追加する
 
 1. `home/dot_config/mise/config.toml`の`[tools]`へ版を追加する。
-2. `chezmoi apply`のあと`bash bin/bootstrap.sh`を再実行する。または`mise install`を実行する。
+2. `chezmoi apply`のあと`bash scripts/bootstrap.sh`を再実行する。または`mise install`を実行する。
 
 ### aptパッケージを追加する
 
 1. `mitamae/roles/apt.rb`へパッケージ名を追加する。
-2. `bash bin/bootstrap.sh`を再実行する。
+2. `bash scripts/bootstrap.sh`を再実行する。
 
 ### リモートの更新を適用する
 
@@ -156,7 +157,7 @@ dotfiles/
 cd ~/dotfiles
 git pull --ff-only
 chezmoi apply --source="$PWD"
-bash bin/bootstrap.sh
+bash scripts/bootstrap.sh
 ```
 
 - 更新後は新しいターミナルを開き、[導入結果を確認する](getting-started.md#導入結果を確認する)を確認する。
@@ -167,21 +168,21 @@ bash bin/bootstrap.sh
 | ---------------------- | ------------------------------------------------- |
 | 導入手順               | 記載済み。整備者検証はDockerのみ                  |
 | chezmoi（snap）        | 手順化済み（bootstrap外）。Docker検証ではバイナリ同梱で代替 |
-| bin/bootstrap.sh       | 実装済み（プロビジョニング専用）                  |
+| scripts/bootstrap.sh       | 実装済み（プロビジョニング専用）                  |
 | mitamaeレシピ          | 実装済み（apt / Docker / mise / PATH / zsh）      |
 | miseツール定義         | 実装済み（シェル・Git・delta・ランタイム・herdr / hunk） |
 | chezmoiシェル設定      | 実装済み（zsh / sheldon / starship / atuin）      |
 | chezmoi Vim設定        | 実装済み（`.vimrc` + vim-plug 自動導入）          |
 | 共通アプリ設定         | Git設定テンプレート実装済み（署名・鍵運用は未整備） |
-| bin/update.sh          | 未実装（範囲外）                                  |
+| scripts/update.sh          | 未実装（範囲外）                                  |
 | Docker検証・自動化     | 検証の正。手順あり（変更後は再実行して確認）      |
 | WSL／Ubuntu実機検証    | 対象外（余力のある実機がない）                    |
 
 ## 今後の整備順序
 
-1. **Dockerでの検証**：変更後は`bash bin/docker-validate.sh`で初回・再実行を確認する。
+1. **Dockerでの検証**：変更後は`bash docker/docker-validate.sh`で初回・再実行を確認する。
 2. **秘密情報の扱い**：age / sops の鍵配置と運用を定める。
-3. **日常更新**：必要なら`bin/update.sh`を追加する。
+3. **日常更新**：必要なら`scripts/update.sh`を追加する。
 
 snapのchezmoi・対話的sudo・WSL連携・GUI・実アカウント認証はDockerでは再現しない。利用者向け手順としては[セットアップ手順](getting-started.md)に残し、整備者の検証対象外とする。
 
