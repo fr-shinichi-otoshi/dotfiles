@@ -1,3 +1,5 @@
+import type * as Preset from '@docusaurus/preset-classic';
+import type { Config } from '@docusaurus/types';
 import { themes as prismThemes } from 'prism-react-renderer';
 
 const [owner, repository] = (
@@ -5,8 +7,7 @@ const [owner, repository] = (
 ).split('/');
 const repositoryUrl = `https://github.com/${owner}/${repository}`;
 
-/** @type {import('@docusaurus/types').Config} */
-const config = {
+const config: Config = {
   title: 'dotfiles',
   tagline: 'Ubuntuから始めるローカル開発',
   url: `https://${owner}.github.io`,
@@ -32,7 +33,7 @@ const config = {
         docs: {
           path: './docs',
           routeBasePath: '/',
-          sidebarPath: './sidebars.js',
+          sidebarPath: './sidebars.ts',
           editUrl: ({ docPath }) =>
             `${repositoryUrl}/edit/main/docs/docs/${docPath}`,
           showLastUpdateTime: false,
@@ -41,7 +42,7 @@ const config = {
         theme: {
           customCss: './src/css/custom.css',
         },
-      },
+      } satisfies Preset.Options,
     ],
   ],
   themeConfig: {
@@ -66,7 +67,7 @@ const config = {
       darkTheme: prismThemes.dracula,
       additionalLanguages: ['bash', 'powershell', 'toml', 'git', 'yaml'],
     },
-  },
+  } satisfies Preset.ThemeConfig,
 };
 
 export default config;

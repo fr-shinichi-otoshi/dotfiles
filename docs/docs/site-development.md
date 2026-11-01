@@ -14,7 +14,7 @@
 ## 構成
 
 - **本文**：`docs/docs/`にMarkdownで記述します。
-- **サイト設定**：`docs/`でDocusaurusを管理します。
+- **サイト設定**：`docs/`でDocusaurusを管理します。設定はTypeScript（`docusaurus.config.ts`、`sidebars.ts`）です。
 - **README**：リポジトリの概要と詳細手順への入口に絞ります。
 
 ## ローカルで表示する
@@ -42,7 +42,7 @@ pnpm serve
 pnpm check
 ```
 
-- ESLint、Stylelint、textlint、Prettierをまとめて実行します。
+- ESLint、Stylelint、textlint、`tsc`（型検査）、Prettierをまとめて実行します。
 - 自動修正は`pnpm format`（CSSは`pnpm lint:css:fix`）。textlintの意味変更は手動で直します。
 - 本文・見出し・箇条書きは「です・ます調」に統一します。
 - 長い引数は`docs/scripts/`、実行順は`package.json`で管理します。キャッシュは`docs/.cache/`です。
@@ -51,7 +51,7 @@ pnpm check
 ## ページを追加する
 
 1. `docs/docs/`にMarkdownを追加します。
-2. `docs/sidebars.js`へ、拡張子を除いたファイル名を追加します。
+2. `docs/sidebars.ts`へ、拡張子を除いたファイル名を追加します。
 3. `pnpm check`と`pnpm build`で確認します。
 
 見出しに番号は付けず、説明は箇条書きを基本とします。リンクは相対パスです。
