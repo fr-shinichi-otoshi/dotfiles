@@ -2,7 +2,7 @@
 
 - **対象者**：新卒や、Linuxでの開発経験がないチームメンバー。
 - **進め方**：前提条件を確認し、初回セットアップを上から順に実行する。
-- **現在の状態**：snapのchezmoi適用後にbootstrapでプロビジョニングする流れまで実装済みである。Git共通設定（署名以外）も配布する。署名・鍵運用は未整備である。[実装・検証状況](maintenance.md#実装検証状況)を確認してから利用する。
+- **現在の状態**：snapのchezmoi適用後にbootstrapでプロビジョニングする流れまで実装済みである。Git共通設定（署名以外）も配布する。署名・鍵運用は未整備である。整備者の検証はDockerのみ（実機検証は対象外）である。[実装・検証状況](maintenance.md#実装検証状況)を確認してから利用する。
 
 ## 前提条件
 
@@ -26,8 +26,8 @@
 
 - WSL導入後の作業では、Ubuntu内でもsudoを実行できることが必要である。
 - 会社のPCで管理者権限や外部への通信が制限されている場合は、導入前に担当者へ確認する。Docker Engineの導入も制限対象になりうる。
-- Git・SSHは以下の手順で導入する。chezmoiはsnapで導入する（bootstrap.shでは入れない）。
-- bootstrap.shはDocker Engineも公式aptリポジトリから導入する。
+- Git・SSHは以下の手順で導入する。chezmoiはsnapで導入する（`bin/bootstrap.sh`では入れない）。
+- `bin/bootstrap.sh`はDocker Engineも公式aptリポジトリから導入する。
 - WSLでsnapとDockerを使う場合は、systemdが有効であること。無効な場合は指導者へ確認する。
 
 ### 用意しておくアカウント・情報
@@ -56,7 +56,7 @@
 5. dotfilesをSSHでクローンする。
 6. 名前・メールアドレスを設定する。
 7. snapでchezmoiを導入し、設定を適用する。
-8. `~/dotfiles`で`bootstrap.sh`を実行する。
+8. `~/dotfiles`で`bin/bootstrap.sh`を実行する。
 9. 新しいターミナルで導入結果を確認する。
 
 - WindowsのWSL導入はPowerShell、以降のコマンドはUbuntuで実行する。
@@ -248,11 +248,11 @@ test -f ~/.config/mise/config.toml && test -f ~/.zshrc && test -f ~/.vimrc && te
 - **操作**：以下を実行し、sudoのパスワードを求められたらUbuntuのパスワードを入力する。
 
 ```bash
-bash bootstrap.sh
+bash bin/bootstrap.sh
 ```
 
 - mitamaeによるパッケージ導入と、miseによるCLI導入を、このスクリプトが行う。chezmoiのinstall / applyは行わない。処理の詳細は[管理・保守の方針](maintenance.md)を参照する。
-- `sudo bash bootstrap.sh`ではなく、上記のとおり一般ユーザーで実行する。
+- `sudo bash bin/bootstrap.sh`ではなく、上記のとおり一般ユーザーで実行する。
 
 ### 導入結果を確認する
 
@@ -322,12 +322,12 @@ sudo docker run --rm hello-world
 cd ~/dotfiles
 git pull --ff-only
 chezmoi apply --source="$PWD"
-bash bootstrap.sh
+bash bin/bootstrap.sh
 ```
 
 - 更新後も「導入結果を確認する」を確認する。
 - 個人設定を作成するコマンドは、通常の更新では実行しない。
-- 日常更新用の`update.sh`は未実装である。
+- 日常更新用の`bin/update.sh`は未実装である。
 
 ## 困ったとき
 
@@ -351,8 +351,8 @@ bash bootstrap.sh
 
 ### bootstrap.shが見つからない
 
-- `~/dotfiles`で実行しているか確認する。
-- 配布されているブランチにスクリプトがあるか確認する。
+- `~/dotfiles`で`bash bin/bootstrap.sh`を実行しているか確認する。
+- 配布されているブランチに`bin/bootstrap.sh`があるか確認する。
 
 ### chezmoi または mise 設定が無いと bootstrap が停止する
 

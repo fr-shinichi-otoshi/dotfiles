@@ -38,10 +38,10 @@ done
 docker exec "${CONTAINER_NAME}" systemctl is-system-running
 
 echo "syncing repository and SSH into developer home"
-docker exec -u root "${CONTAINER_NAME}" bash /mnt/dotfiles/scripts/docker-validate-setup.sh
+docker exec -u root "${CONTAINER_NAME}" bash /mnt/dotfiles/bin/docker-validate-setup.sh
 
 echo "running validation"
 docker exec -u developer -w /home/developer \
   -e HOME=/home/developer -e USER=developer \
   -e PATH=/usr/local/bin:/home/developer/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-  "${CONTAINER_NAME}" bash /home/developer/dotfiles-work/scripts/docker-validate-run.sh
+  "${CONTAINER_NAME}" bash /home/developer/dotfiles-work/bin/docker-validate-run.sh
