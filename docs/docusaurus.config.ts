@@ -10,6 +10,7 @@ const repositoryUrl = `https://github.com/${owner}/${repository}`;
 const config: Config = {
   title: 'dotfiles',
   tagline: 'Ubuntuから始めるローカル開発',
+  favicon: 'img/favicon.svg',
   url: `https://${owner}.github.io`,
   baseUrl: repository === `${owner}.github.io` ? '/' : `/${repository}/`,
   organizationName: owner,
