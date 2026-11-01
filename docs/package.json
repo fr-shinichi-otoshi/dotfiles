@@ -2,7 +2,7 @@
   "name": "dotfiles-docs",
   "version": "0.1.0",
   "private": true,
-  "description": "WSL・Ubuntu向けのAI駆動開発環境を案内する日本語ドキュメントサイト。",
+  "description": "WSL・Ubuntu向けのローカル開発環境を案内する日本語ドキュメントサイト。",
   "scripts": {
     "build": "docusaurus build",
     "check": "pnpm lint && pnpm format:check",

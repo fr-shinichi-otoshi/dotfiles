@@ -8,7 +8,7 @@ const repositoryUrl = `https://github.com/${owner}/${repository}`;
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'dotfiles',
-  tagline: 'Ubuntuから始めるAI駆動開発',
+  tagline: 'Ubuntuから始めるローカル開発',
   url: `https://${owner}.github.io`,
   baseUrl: repository === `${owner}.github.io` ? '/' : `/${repository}/`,
   organizationName: owner,

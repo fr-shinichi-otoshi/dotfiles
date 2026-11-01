@@ -1,6 +1,6 @@
 # dotfiles
 
-WSL／Ubuntu向けのAI駆動開発環境を、chezmoi・mitamae・miseで管理・共有するリポジトリである。
+WSL／Ubuntu向けのローカル開発環境を、chezmoi・mitamae・miseで管理・共有するリポジトリである。
 
 - **対象**：開発メンバー
 - **環境**：WSL 2上のUbuntu、またはLinuxのUbuntu。
