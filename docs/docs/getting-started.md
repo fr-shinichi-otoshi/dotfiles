@@ -3,8 +3,9 @@
 上から順に実行します。失敗したら先へ進まず[困ったとき](troubleshooting.md)を確認します。
 
 - **対象**：開発メンバー。環境はWSL2またはLinuxのUbuntu（検証基準は24.04 LTS）。
-- **事前**：GitHubにログインできること。リポジトリ所有者名、Git用の名前とメールアドレスを用意します。詳細は[事前確認](troubleshooting.md#事前確認)を参照してください。
+- **事前**：GitHubにログインできること。Git用の名前とメールアドレスを用意します。詳細は[事前確認](troubleshooting.md#事前確認)を参照してください。
 - **場所**：WindowsのWSL導入だけPowerShell。以降と、公開鍵の登録以外はUbuntuのターミナルです。
+- **クローン先**：自分のGitHubアカウントへフォークしてからクローンします。
 
 ## Ubuntuを準備する
 
@@ -56,9 +57,20 @@ ssh -T git@github.com
 
 `successfully authenticated`が表示されれば成功です。`does not provide shell access`はエラーではありません。
 
+## リポジトリをフォークする
+
+配布元を自分のアカウントへコピーします。ブラウザで行います。
+
+1. GitHubにログインした状態で、配布元の[dotfilesリポジトリ](https://github.com/fr-shinichi-otoshi/dotfiles)を開きます。
+2. 右上の**Fork**を選びます。
+3. **Owner**が自分のアカウントになっていることを確認し、**Create fork**を選びます。
+4. 作成後のURLが`https://github.com/<github-username>/dotfiles`になっていることを確認します。`<github-username>`は自分のGitHubユーザー名です。
+
+すでに自分のフォークがある場合は、この手順は不要です。管理者から別の配布元を案内された場合は、そのリポジトリを開いて同様にフォークします。
+
 ## dotfilesをクローンする
 
-`<github-username>`を所有者名に置き換えます。自分用に管理する場合は先にフォークします。
+`<github-username>`を、いま作ったフォークの所有者名（自分のGitHubユーザー名）に置き換えます。
 
 ```bash
 git clone git@github.com:<github-username>/dotfiles.git ~/dotfiles

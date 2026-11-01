@@ -1,10 +1,22 @@
 # 導入後の更新
 
-初回セットアップ済みの環境を、配布元の最新内容に合わせます。
+初回セットアップ済みの環境を、最新内容に合わせます。
 
-- 自分のフォークを利用している場合は、配布元の変更をフォークへ取り込んでから実行します。
 - ローカルでファイルを変更している場合は、先に管理者と変更内容を確認します。
 - 個人設定（`chezmoi.toml`）の再作成は不要です。
+
+配布元の変更を自分のフォークへ取り込む場合の例です。初回だけ`upstream`を登録します。
+
+```bash
+cd ~/dotfiles
+git remote add upstream git@github.com:fr-shinichi-otoshi/dotfiles.git
+git fetch upstream
+git checkout main
+git merge --ff-only upstream/main
+git push origin main
+```
+
+すでに`upstream`がある場合は、`git remote add`は不要です。取り込めたらローカルへ適用します。
 
 ```bash
 cd ~/dotfiles

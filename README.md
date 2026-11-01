@@ -16,10 +16,11 @@ WSL／Ubuntu向けのローカル開発環境を、chezmoi・mitamae・miseで�
 
 1. Ubuntuを準備します。
 2. SSH鍵を作成し、公開鍵をGitHubに登録します。
-3. SSH接続を確認し、リポジトリをクローンします。
-4. 個人設定を作成します。
-5. snapでchezmoiを導入し、設定を適用します。
-6. `bash scripts/bootstrap.sh`を実行します。
+3. SSH接続を確認し、配布元を自分のアカウントへフォークします。
+4. 自分のフォークをクローンします。
+5. 個人設定を作成します。
+6. snapでchezmoiを導入し、設定を適用します。
+7. `bash scripts/bootstrap.sh`を実行します。
 
 ## ドキュメント
 
