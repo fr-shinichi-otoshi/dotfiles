@@ -3,11 +3,18 @@ const sidebars = {
   guide: [
     'intro',
     'getting-started',
+    'update',
+    'troubleshooting',
     {
       type: 'category',
       label: '整備者向け',
       collapsed: false,
-      items: ['docker-validation', 'maintenance', 'site-development'],
+      items: [
+        'architecture',
+        'maintenance',
+        'docker-validation',
+        'site-development',
+      ],
     },
   ],
 };

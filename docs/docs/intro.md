@@ -6,22 +6,23 @@ title: はじめに
 # ローカル開発環境をそろえる
 
 - **目的**：開発環境の構築手順と共通設定を共有し、チームで同じ環境を使い始められるようにします。
-- **対象**：新卒やLinuxでの開発経験がないチームメンバー。
+- **対象**：開発メンバー。
 - **環境**：WSL2上のUbuntu、またはLinuxのUbuntu。検証基準はUbuntu 24.04 LTSです。
 
-## まず読むページ
+## やること
 
-- [セットアップ手順](getting-started.md)：前提条件の確認から、SSH認証、クローン、chezmoi適用、`scripts/bootstrap.sh`の実行までを扱います。
-- コマンドは上から順に実行します。chezmoiの仕組みは、初回導入時に理解する必要はありません。
+1. [セットアップ](getting-started.md)を上から実行します。
+2. 導入後の取り込みは[更新](update.md)です。
+3. 止まったら[困ったとき](troubleshooting.md)を見ます。
+
+chezmoiの仕組みは、初回導入時に理解する必要はありません。
 
 ## 現在の状態
 
-- snapのchezmoi適用後にbootstrapでプロビジョニングする流れまで実装済みです。
-- Git共通設定（署名以外）は実装済みです。署名・鍵運用は未整備です。
-- 整備者の検証はDockerのみとします（実機検証は対象外）。詳細は[実装・検証状況](maintenance.md#実装検証状況)を参照してください。
+snapのchezmoi適用後にbootstrapでプロビジョニングする流れと、Git共通設定（署名以外）まで利用できます。署名・鍵運用は未整備です。詳細は[実装・検証状況](architecture.md#実装検証状況)を参照してください。
 
 ## 整備を担当する人へ
 
-- [Dockerでの検証](docker-validation.md)
-- [管理・保守の方針](maintenance.md)
-- [ドキュメントサイトの開発・公開](site-development.md)
+1. [構成と方針](architecture.md)で全体を把握します。
+2. 変更は[設定の変更手順](maintenance.md)に従い、[Dockerでの検証](docker-validation.md)で確認します。
+3. ドキュメントサイトは[ドキュメントサイトの開発・公開](site-development.md)です。
