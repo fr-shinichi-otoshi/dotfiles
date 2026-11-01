@@ -1,4 +1,4 @@
-name: Documentation
+name: Docs CD
 
 on:
   push:
@@ -6,19 +6,14 @@ on:
     paths:
       - 'docs/**'
       - 'README.md'
-      - '.github/workflows/docs.yml'
-  pull_request:
-    paths:
-      - 'docs/**'
-      - 'README.md'
-      - '.github/workflows/docs.yml'
+      - '.github/workflows/docs-cd.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: docs-${{ github.ref }}
+  group: docs-cd-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -29,23 +24,22 @@ jobs:
         working-directory: docs
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '24'
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: docs/package.json
           run_install: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: docs/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check
       - run: pnpm build
       - uses: actions/upload-pages-artifact@v4
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           path: docs/build
 
   deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     permissions:

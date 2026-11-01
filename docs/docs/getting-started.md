@@ -233,13 +233,13 @@ chezmoi init --source="$PWD"
 chezmoi apply --source="$PWD"
 ```
 
-- **確認結果**：`~/.config/mise/config.toml`と`~/.zshrc`と`~/.vimrc`と`~/.gitconfig`と`~/.gitignore_global`が存在すること。
+- **確認結果**：次のファイルが存在すること。`~/.config/mise/config.toml`、`~/.zshrc`、`~/.vimrc`、`~/.gitconfig`、`~/.gitignore_global`。
 
 ```bash
 test -f ~/.config/mise/config.toml && test -f ~/.zshrc && test -f ~/.vimrc && test -f ~/.gitconfig && test -f ~/.gitignore_global && echo ok
 ```
 
-- 個人設定（name / email）が無いと、以降の手順で困る場合がある。適用前に`chezmoi.toml`を確認する。
+- 個人設定（name/email）が無いと、以降の手順で困る場合がある。適用前に`chezmoi.toml`を確認する。
 
 ### bootstrap.shを実行する
 
@@ -251,7 +251,7 @@ test -f ~/.config/mise/config.toml && test -f ~/.zshrc && test -f ~/.vimrc && te
 bash scripts/bootstrap.sh
 ```
 
-- mitamaeによるパッケージ導入と、miseによるCLI導入を、このスクリプトが行う。chezmoiのinstall / applyは行わない。処理の詳細は[管理・保守の方針](maintenance.md)を参照する。
+- mitamaeによるパッケージ導入と、miseによるCLI導入を、このスクリプトが行う。chezmoiのinstall/applyは行わない。処理の詳細は[管理・保守の方針](maintenance.md)を参照する。
 - `sudo bash scripts/bootstrap.sh`ではなく、上記のとおり一般ユーザーで実行する。
 
 ### 導入結果を確認する
@@ -362,7 +362,7 @@ bash scripts/bootstrap.sh
 
 ### snap install に失敗する
 
-- WSLでsystemdが無効な場合がある。指導者へ確認する。
+- WSLではsystemdが無効になっていることがある。指導者へ確認する。
 - `sudo snap install chezmoi --classic`のエラー全文を残して共有する。
 
 ## 参考資料

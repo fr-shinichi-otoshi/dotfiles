@@ -108,11 +108,12 @@ docs/.cache/
 
 1. GitHubでリポジトリの**Settings → Pages**を開く。
 2. **Build and deployment → Source**を**GitHub Actions**に設定する。
-3. 変更を`main`へプッシュする。手動の場合はActionsの**Documentation**から実行する。
+3. 変更を`main`へプッシュする。手動の場合はActionsの**Docs CD**から実行する。
 4. ワークフローが成功した後、Pagesの公開URLを開く。
 
-- プルリクエストでは`pnpm check`とビルドを実行し、公開しない。
-- 公開処理は`.github/workflows/docs.yml`で管理する。
+- **Docs CI**（`.github/workflows/docs-ci.yml`）：プルリクエストと`main`へのpushで`pnpm check`とビルドを実行する。公開はしない。
+- **Docs CD**（`.github/workflows/docs-cd.yml`）：`main`へのpushでビルドし、GitHub Pagesへ公開する。
+- Actionsではpnpmストアをキャッシュする。Docs CIでは加えて`docs/.cache/`（ESLint/Stylelint/textlint/Prettier）もキャッシュする。
 - GitHub Actionsでは`GITHUB_REPOSITORY`から所有者名とリポジトリ名を取得し、URLとベースパスを設定する。
 - フォーク先でローカル表示の公開先設定を変える場合は、`docs/docusaurus.config.js`の既定値を変更するか、`GITHUB_REPOSITORY`を設定する。
 - このプロジェクト作成時点では、Pagesの有効化・プッシュ・公開は実行していない。

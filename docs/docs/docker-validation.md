@@ -5,7 +5,7 @@
 - **位置づけ**：整備者向けの検証の正である。余力のある実機がないため、WSL／Ubuntu実機での検証は行わない。
 - **目的**：ホストのホーム設定を変更せず、初回構築・再適用・GitHub SSH認証を確認する。
 - **対象**：ローカルのdotfilesリポジトリ。未コミット・未プッシュの変更も含む。
-- **流れ**：検証用イメージを build → コンテナ起動 → `chezmoi apply` → `scripts/bootstrap.sh` → `ssh -T git@github.com`。
+- **流れ**：検証用イメージをbuild → コンテナ起動 → `chezmoi apply` → `scripts/bootstrap.sh` → `ssh -T git@github.com`。
 - **ソース**：リポジトリはバインドマウントする。GitHubからのクローンは行わない。
 - **SSH**：ホストの`~/.ssh`をread-onlyでマウントし、認証だけ確認する。
 - **前提**：Dockerが起動済みであり、`docker version`でサーバーへ接続できること。
@@ -22,24 +22,24 @@ bash docker/docker-validate.sh
 
 このスクリプトが次を行う。
 
-1. `Dockerfile`から`dotfiles-validate:local`を build する。
-2. `dotfiles-check`コンテナを privileged + cgroup 付きで起動し、リポジトリと`~/.ssh`をマウントする。
+1. `Dockerfile`から`dotfiles-validate:local`をbuildする。
+2. `dotfiles-check`コンテナをprivileged + cgroup付きで起動し、リポジトリと`~/.ssh`をマウントする。
 3. リポジトリとSSH鍵を`developer`ホームへ同期する。
-4. `docker-validate-run.sh`で apply / bootstrap / CLI確認 / GitHub SSH を実行する。
+4. `docker-validate-run.sh`でapply/bootstrap/CLI確認/GitHub SSHを実行する。
 
 成功時は標準出力に`ALL_CHECKS_PASSED`が出力される。
 
-Windows（PowerShell）から同じことをする場合の例:
+Windows（PowerShell）から同じことをする場合の例は次のとおりである。
 
 ```powershell
 wsl -e bash -lc 'cd /mnt/c/Users/<you>/develop/dotfiles && bash docker/docker-validate.sh'
 ```
 
-または Git Bash など bash が使える環境でリポジトリルートから実行する。
+またはGit Bashなどbashが使える環境でリポジトリルートから実行する。
 
 ## コンテナに入って確認する
 
-検証後に手動で見る場合:
+検証後に手動で見る場合は、次のコマンドを実行する。
 
 ```bash
 docker exec -it -u developer -w /home/developer \
@@ -69,7 +69,7 @@ docker rm -f dotfiles-check
 
 ## Docker検証の対象外
 
-整備者は実機検証を行わない。次の項目はDockerでは再現せず、検証対象外とする。利用者向けの手順は[セットアップ手順](getting-started.md)に残す。
+整備者は実機では検証しない。次の項目はDockerでは再現せず、検証対象外とする。利用者向けの手順は[セットアップ手順](getting-started.md)に残す。
 
 - **snapのchezmoi**：検証イメージはバイナリ同梱で代替する。
 - **対話的sudo・WSL2連携**：Windowsとの連携を含む。

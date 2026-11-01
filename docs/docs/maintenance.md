@@ -34,35 +34,35 @@
 
 ## 導入のレイヤ
 
-| 層 | 役割 | 主な対象 |
-| --- | --- | --- |
-| snap / chezmoi | 設定配布の入口 | chezmoi導入、`init` / `apply` |
-| `scripts/bootstrap.sh` | プロビジョニング入口 | mitamae取得、レシピ実行、mise再install、sheldon lock |
-| mitamae | マシンのプロビジョニング | apt、Docker Engine、mise導入、bashrc PATH、chsh→zsh |
-| mise | CLI / ランタイムの版管理 | シェル系、Git系、node / terraform、herdr / hunk など |
+| 層                     | 役割                     | 主な対象                                             |
+| ---------------------- | ------------------------ | ---------------------------------------------------- |
+| snap / chezmoi         | 設定配布の入口           | chezmoi導入、`init` / `apply`                        |
+| `scripts/bootstrap.sh` | プロビジョニング入口     | mitamae取得、レシピ実行、mise再install、sheldon lock |
+| mitamae                | マシンのプロビジョニング | apt、Docker Engine、mise導入、bashrc PATH、chsh→zsh  |
+| mise                   | CLI / ランタイムの版管理 | シェル系、Git系、node / terraform、herdr / hunk など |
 
 ### 導入するツール
 
-| ツール | 導入手段 | 版 |
-| --- | --- | --- |
-| git / git-lfs | apt（mitamae） | ディストリビューション提供 |
-| zsh | apt（mitamae） | ディストリビューション提供 |
-| vim | apt（mitamae） | ディストリビューション提供。設定はchezmoiの`.vimrc` |
-| poppler-utils / pandoc | apt（mitamae） | ripgrep-all用 |
-| chezmoi | snap（`--classic`） | snapチャネルの版 |
-| mitamae | GitHub Releases（bootstrap） | 2.0.6 |
-| mise | 公式インストーラ（mitamae） | インストーラが入れる版 |
-| Docker Engine | 公式aptリポジトリ（mitamae） | stableチャネル |
-| CLI一式 | mise | `home/dot_config/mise/config.toml`が正 |
+| ツール                 | 導入手段                     | 版                                                  |
+| ---------------------- | ---------------------------- | --------------------------------------------------- |
+| git / git-lfs          | apt（mitamae）               | ディストリビューション提供                          |
+| zsh                    | apt（mitamae）               | ディストリビューション提供                          |
+| vim                    | apt（mitamae）               | ディストリビューション提供。設定はchezmoiの`.vimrc` |
+| poppler-utils / pandoc | apt（mitamae）               | ripgrep-all用                                       |
+| chezmoi                | snap（`--classic`）          | snapチャネルの版                                    |
+| mitamae                | GitHub Releases（bootstrap） | 2.0.6                                               |
+| mise                   | 公式インストーラ（mitamae）  | インストーラが入れる版                              |
+| Docker Engine          | 公式aptリポジトリ（mitamae） | stableチャネル                                      |
+| CLI一式                | mise                         | `home/dot_config/mise/config.toml`が正              |
 
 miseで入れる主なCLIは次のとおりである。
 
-- 既存: `gh` / `sops` / `age`
-- シェル: `fzf` / `ripgrep` / `fd` / `eza` / `sheldon` / `starship` / `atuin`
-- Git: `lazygit` / `lefthook` / `delta`（`gitui`は入れない）
-- ランタイム: `node` / `uv` / `terraform` / `tflint` / `terraform-docs`
-- 追加: `broot` / `gping` / `ripgrep-all` / `lazydocker`
-- エージェント／レビュー: `herdr` / `hunk`
+- 既存: `gh`/`sops`/`age`
+- シェル: `fzf`/`ripgrep`/`fd`/`eza`/`sheldon`/`starship`/`atuin`
+- Git: `lazygit`/`lefthook`/`delta`（`gitui`は入れない）
+- ランタイム: `node`/`uv`/`terraform`/`tflint`/`terraform-docs`
+- 追加: `broot`/`gping`/`ripgrep-all`/`lazydocker`
+- エージェント／レビュー: `herdr`/`hunk`
 
 CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正である。chezmoiとDocker Engineはmiseでは管理しない。
 
@@ -113,7 +113,7 @@ dotfiles/
 - **前提**：snapでchezmoiを導入し、このリポジトリをsourceにして`chezmoi apply`済みであること。
 - **入口**：リポジトリ直下で`bash scripts/bootstrap.sh`を実行する。
 - **担当する処理**：mitamaeの取得、レシピ実行、miseの再install、sheldon lock。
-- **担当しない処理**：chezmoiのinstall / init / apply。日常更新用の`scripts/update.sh`は別途（未実装）。
+- **担当しない処理**：chezmoiのinstall/init/apply。日常更新用の`scripts/update.sh`は別途（未実装）。
 - **再実行**：導入済みのツールを考慮して処理する。
 - **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、`scripts/bootstrap.sh`では扱わない。
 
@@ -164,24 +164,24 @@ bash scripts/bootstrap.sh
 
 ## 実装・検証状況
 
-| 項目                   | 状態                                              |
-| ---------------------- | ------------------------------------------------- |
-| 導入手順               | 記載済み。整備者検証はDockerのみ                  |
-| chezmoi（snap）        | 手順化済み（bootstrap外）。Docker検証ではバイナリ同梱で代替 |
-| scripts/bootstrap.sh       | 実装済み（プロビジョニング専用）                  |
-| mitamaeレシピ          | 実装済み（apt / Docker / mise / PATH / zsh）      |
-| miseツール定義         | 実装済み（シェル・Git・delta・ランタイム・herdr / hunk） |
-| chezmoiシェル設定      | 実装済み（zsh / sheldon / starship / atuin）      |
-| chezmoi Vim設定        | 実装済み（`.vimrc` + vim-plug 自動導入）          |
-| 共通アプリ設定         | Git設定テンプレート実装済み（署名・鍵運用は未整備） |
-| scripts/update.sh          | 未実装（範囲外）                                  |
-| Docker検証・自動化     | 検証の正。手順あり（変更後は再実行して確認）      |
-| WSL／Ubuntu実機検証    | 対象外（余力のある実機がない）                    |
+| 項目                 | 状態                                                        |
+| -------------------- | ----------------------------------------------------------- |
+| 導入手順             | 記載済み。整備者検証はDockerのみ                            |
+| chezmoi（snap）      | 手順化済み（bootstrap外）。Docker検証ではバイナリ同梱で代替 |
+| scripts/bootstrap.sh | 実装済み（プロビジョニング専用）                            |
+| mitamaeレシピ        | 実装済み（apt / Docker / mise / PATH / zsh）                |
+| miseツール定義       | 実装済み（シェル・Git・delta・ランタイム・herdr / hunk）    |
+| chezmoiシェル設定    | 実装済み（zsh / sheldon / starship / atuin）                |
+| chezmoi Vim設定      | 実装済み（`.vimrc` + vim-plug 自動導入）                    |
+| 共通アプリ設定       | Git設定テンプレート実装済み（署名・鍵運用は未整備）         |
+| scripts/update.sh    | 未実装（範囲外）                                            |
+| Docker検証・自動化   | 検証の正。手順あり（変更後は再実行して確認）                |
+| WSL／Ubuntu実機検証  | 対象外（余力のある実機がない）                              |
 
 ## 今後の整備順序
 
 1. **Dockerでの検証**：変更後は`bash docker/docker-validate.sh`で初回・再実行を確認する。
-2. **秘密情報の扱い**：age / sops の鍵配置と運用を定める。
+2. **秘密情報の扱い**：age/sopsの鍵配置と運用を定める。
 3. **日常更新**：必要なら`scripts/update.sh`を追加する。
 
 snapのchezmoi・対話的sudo・WSL連携・GUI・実アカウント認証はDockerでは再現しない。利用者向け手順としては[セットアップ手順](getting-started.md)に残し、整備者の検証対象外とする。

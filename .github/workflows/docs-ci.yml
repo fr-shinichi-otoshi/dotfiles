@@ -1,0 +1,49 @@
+name: Docs CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/docs-ci.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/docs-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: docs/package.json
+          run_install: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: docs/pnpm-lock.yaml
+      - uses: actions/cache@v4
+        with:
+          path: docs/.cache
+          key: docs-lint-${{ runner.os }}-${{ hashFiles('docs/pnpm-lock.yaml', 'docs/.textlintrc.json', 'docs/.prettierrc.json', 'docs/eslint.config.mjs', 'docs/stylelint.config.mjs', 'docs/prh.yml', 'docs/scripts/*.mjs') }}
+          restore-keys: |
+            docs-lint-${{ runner.os }}-
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm build

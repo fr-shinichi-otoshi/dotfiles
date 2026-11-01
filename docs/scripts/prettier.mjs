@@ -10,5 +10,6 @@ runTool('prettier', [
   'content',
   '.',
   '../README.md',
-  '../.github/workflows/docs.yml',
+  '../.github/workflows/docs-ci.yml',
+  '../.github/workflows/docs-cd.yml',
 ]);
