@@ -13,6 +13,7 @@ end
   vim
   poppler-utils
   pandoc
+  libatomic1
 ].each do |name|
   package name do
     action :install

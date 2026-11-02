@@ -52,6 +52,7 @@
 | zsh                    | apt（mitamae）               | ディストリビューション提供                          |
 | vim                    | apt（mitamae）               | ディストリビューション提供。設定はchezmoiの`.vimrc` |
 | poppler-utils / pandoc | apt（mitamae）               | ripgrep-all用                                       |
+| libatomic1             | apt（mitamae）               | Node.js公式バイナリが要求する共有ライブラリ         |
 | chezmoi                | snap（`--classic`）          | snapチャネルの版                                    |
 | mitamae                | GitHub Releases（bootstrap） | 2.0.6                                               |
 | mise                   | 公式インストーラ（mitamae）  | インストーラが入れる版                              |
