@@ -56,6 +56,12 @@ const config: Config = {
           label: 'セットアップ',
           position: 'left',
         },
+        {
+          type: 'doc',
+          docId: 'tools/index',
+          label: 'ツール',
+          position: 'left',
+        },
         { href: repositoryUrl, label: 'GitHub', position: 'right' },
       ],
     },

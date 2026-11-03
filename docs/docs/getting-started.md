@@ -132,6 +132,7 @@ sudo docker run --rm hello-world
 - ログインシェルが`/usr/bin/zsh`であること。
 - 各コマンドの版が表示され、`chezmoi diff`に意図しない差分がないこと。
 - `docker version`と`hello-world`が成功すること。
-- Vimは一度起動するとvim-plugが入ります。主要CLIの一覧は[構成と方針](architecture.md#導入するツール)を参照してください。
+- Vimは一度起動するとvim-plugが入ります。
+- 各ツールの説明は[導入するツール](tools/index.md)です。導入手段と版の一覧は[構成と方針](architecture.md#導入するツール)です。
 
 初回が終わったら、以降は[導入後の更新](update.md)を使います。

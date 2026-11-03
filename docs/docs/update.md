@@ -15,7 +15,7 @@ bash scripts/update.sh
 ```
 
 - aptを更新し、miseツールを`mise upgrade --bump`で版バンプし、sheldonを更新します。
-- `~/.config/mise/config.toml`が書き換わることがあります。版をリポジトリと共有したい場合は、整備者向けの[設定の変更手順](maintenance.md#cliの版を上げて共有する)を使います。
+- `~/.config/mise/config.toml`は書き換わることがあります。版をリポジトリと共有したい場合は、整備者向けの[設定の変更手順](maintenance.md#cliの版を上げて共有する)を使います。
 - このあと`chezmoi apply`を実行すると、リポジトリ側の版に戻ります。
 
 更新後は新しいターミナルを開くか`exec zsh`を実行します。

@@ -12,6 +12,8 @@ WSL／Ubuntu向けのローカル開発環境を、chezmoi・mitamae・miseで�
 2. 導入後は[更新](docs/docs/update.md)です。
 3. 止まったら[困ったとき](docs/docs/troubleshooting.md)を見ます。
 
+入っているツールの役割は[導入するツール](docs/docs/tools/index.md)です。
+
 導入の流れの概要は次のとおりです。
 
 1. Ubuntuを準備します。
@@ -28,6 +30,7 @@ WSL／Ubuntu向けのローカル開発環境を、chezmoi・mitamae・miseで�
 - [セットアップ](docs/docs/getting-started.md)
 - [更新](docs/docs/update.md)
 - [困ったとき](docs/docs/troubleshooting.md)
+- [導入するツール](docs/docs/tools/index.md)
 - [構成と方針](docs/docs/architecture.md)（整備者）
 - [設定の変更手順](docs/docs/maintenance.md)（整備者）
 - [Dockerでの検証](docs/docs/docker-validation.md)（整備者）

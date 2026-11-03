@@ -68,7 +68,7 @@ miseで入れる主なCLIは次のとおりです。
 - 追加: `broot`/`gping`/`ripgrep-all`/`lazydocker`
 - エージェント／レビュー: `herdr`/`hunk`
 
-CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正です。chezmoiとDocker Engineはmiseでは管理しません。
+役割と設定場所は[導入するツール](tools/index.md)です。CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正です。chezmoiとDocker Engineはmiseでは管理しません。
 
 ## chezmoiとプロジェクトの関係
 
@@ -126,7 +126,7 @@ dotfiles/
 - **実行ユーザー**：sudoを実行できる一般ユーザー。
 - **前提**：getting-startedと`scripts/bootstrap.sh`が完了していること。
 - **入口**：リポジトリ直下で`bash scripts/update.sh`を実行します。
-- **担当する処理**：aptの`update` / `upgrade`、`mise upgrade --bump`、sheldon lock。
+- **担当する処理**：aptの`update`/`upgrade`、`mise upgrade --bump`、sheldon lock。
 - **担当しない処理**：chezmoiのinstall/init/apply、mitamae、`scripts/bootstrap.sh`。
 - **版の扱い**：`--bump`は`~/.config/mise/config.toml`を書き換えることがあります。共有する版の正はリポジトリの`home/dot_config/mise/config.toml`です。取り込み手順は[設定の変更手順](maintenance.md#cliの版を上げて共有する)です。
 
