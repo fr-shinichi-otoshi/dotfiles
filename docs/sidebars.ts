@@ -82,6 +82,25 @@ const sidebars: SidebarsConfig = {
           collapsed: true,
           items: ['tools/herdr', 'tools/hunk'],
         },
+        {
+          type: 'category',
+          label: '構造化データと構文',
+          collapsed: true,
+          items: ['tools/jq', 'tools/yq', 'tools/ast-grep'],
+        },
+        {
+          type: 'category',
+          label: '検査と計測',
+          collapsed: true,
+          items: [
+            'tools/shellcheck',
+            'tools/shfmt',
+            'tools/ruff',
+            'tools/knip',
+            'tools/osv-scanner',
+            'tools/hyperfine',
+          ],
+        },
       ],
     },
     {

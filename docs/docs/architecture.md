@@ -67,6 +67,8 @@ miseで入れる主なCLIは次のとおりです。
 - ランタイム: `node`/`uv`/`terraform`/`tflint`/`terraform-docs`
 - 追加: `broot`/`gping`/`ripgrep-all`/`lazydocker`
 - エージェント／レビュー: `herdr`/`hunk`
+- 構造化データ／構文検索: `jq`/`yq`（Mike Farah版）/`ast-grep`
+- 検査／計測: `shellcheck`/`shfmt`/`ruff`/`npm:knip`/`osv-scanner`/`hyperfine`
 
 役割と設定場所は[導入するツール](tools/index.md)です。CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正です。chezmoiとDocker Engineはmiseでは管理しません。
 
@@ -101,13 +103,14 @@ dotfiles/
 │   ├── dot_zshenv / dot_zshrc / dot_zsh_aliases
 │   ├── dot_vimrc
 │   ├── dot_gitconfig.tmpl / dot_gitignore_global
-│   └── dot_config/{mise,sheldon,starship,atuin}/
+│   ├── dot_config/{mise,sheldon,starship,atuin}/
+│   └── dot_cursor/rules/installed-tools.mdc
 ├── docs/
 └── templates/                # プロジェクト用のひな形（今後）
 ```
 
 - **読み込み先**：リポジトリ直下の`.chezmoiroot`に`home`を記載し、`home/`を管理対象のルートにします。
-- **配置の対応**：`home/dot_config/`は`~/.config/`に対応します。
+- **配置の対応**：`home/dot_config/`は`~/.config/`に対応します。`home/dot_cursor/`は`~/.cursor/`に対応します。Cursorが実行時に書くプラグインやキャッシュは、このリポジトリでは管理しません。
 - **開発用ファイル**：README、`docs/`、`mitamae/`、`scripts/`、`docker/`は`home/`の外に置き、ホームへの配置対象から分離します。
 - **既存ファイルの扱い**：`.agent/`、`.cursor/`、`CLAUDE.md`は、リポジトリ開発用ならルートに残し、配布する設定のみchezmoiの命名規則に従って`home/`配下へ追加します。
 
@@ -139,9 +142,10 @@ dotfiles/
 | scripts/bootstrap.sh | 実装済み（プロビジョニング専用）                            |
 | scripts/update.sh    | 実装済み（apt / mise bump / sheldon）                       |
 | mitamaeレシピ        | 実装済み（apt / Docker / mise / PATH / zsh）                |
-| miseツール定義       | 実装済み（シェル・Git・delta・ランタイム・herdr / hunk）    |
+| miseツール定義       | 実装済み（シェル・Git・ランタイム・解析・検査を含む）       |
 | chezmoiシェル設定    | 実装済み（zsh / sheldon / starship / atuin）                |
 | chezmoi Vim設定      | 実装済み（`.vimrc` + vim-plug 自動導入）                    |
+| chezmoi Cursor設定   | 実装済み（`~/.cursor/rules/installed-tools.mdc`のみ）       |
 | 共通アプリ設定       | Git設定テンプレート実装済み（署名・鍵運用は未整備）         |
 | Docker検証・自動化   | 検証の正。手順あり（変更後は再実行して確認）                |
 | WSL／Ubuntu実機検証  | 対象外（余力のある実機がない）                              |

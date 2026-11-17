@@ -85,3 +85,18 @@ title: 導入するツール
 
 - [herdr](herdr.md)：エージェント向けのターミナル作業空間です。
 - [hunk](hunk.md)：差分レビューの画面です。
+
+## 構造化データと構文
+
+- [jq](jq.md)：JSONを抽出・変換します。
+- [yq](yq.md)：YAMLなどの構造化データを扱います。Mike Farah版です。
+- [ast-grep](ast-grep.md)：コードを構文の形で検索・置換します。
+
+## 検査と計測
+
+- [ShellCheck](shellcheck.md)：シェルスクリプトを静的に検査します。
+- [shfmt](shfmt.md)：シェルスクリプトを整形します。
+- [Ruff](ruff.md)：Pythonを検査・整形します。
+- [Knip](knip.md)：JavaScriptとTypeScriptの未使用コードを検出します。
+- [OSV-Scanner](osv-scanner.md)：依存関係の既知の脆弱性を調べます。
+- [hyperfine](hyperfine.md)：コマンドの実行時間を測ります。

@@ -21,6 +21,7 @@ test -f "${HOME}/.zshrc"
 test -f "${HOME}/.vimrc"
 test -f "${HOME}/.gitconfig"
 test -f "${HOME}/.gitignore_global"
+test -f "${HOME}/.cursor/rules/installed-tools.mdc"
 test "$(git config --global --get user.name)" = "Docker Validator"
 test "$(git config --global --get user.email)" = "docker-validator@example.com"
 echo mise_config_ok
@@ -64,6 +65,15 @@ rga --version
 lazydocker --version
 herdr --version
 hunk --version
+jq --version
+yq --version
+ast-grep --version
+shellcheck --version
+shfmt --version
+ruff --version
+knip --version
+osv-scanner --version
+hyperfine --version
 docker --version
 vim --version | head -n 1
 sudo docker version

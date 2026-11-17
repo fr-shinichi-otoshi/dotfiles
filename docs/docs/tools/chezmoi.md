@@ -24,6 +24,7 @@ title: chezmoi
 - ソースのルートはリポジトリ直下の`.chezmoiroot`で、中身は`home`です。
 - `home/dot_zshrc`は`~/.zshrc`に対応します。
 - `home/dot_config/`は`~/.config/`に対応します。
+- `home/dot_cursor/`は`~/.cursor/`に対応します。配布するのは共通ルールだけです。Cursor自身が書く状態ファイルは対象外です。
 - 末尾が`.tmpl`のファイルはテンプレートです。適用時に展開します。
 - 名前かメールアドレスが空だと、`~/.gitconfig`の生成は失敗します。
 
