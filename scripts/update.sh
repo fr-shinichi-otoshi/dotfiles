@@ -2,7 +2,7 @@
 #
 # 日常更新入口。
 # 前提: getting-started / bootstrap 済みであること。
-# apt を更新し、mise ツールを版バンプし、sheldon を更新する。
+# apt を更新し、mise ツールを版バンプし、sheldon と Serena を更新する。
 # chezmoi / mitamae / bootstrap は扱わない。
 #
 
@@ -49,6 +49,11 @@ upgrade_mise() {
   "${MISE_BIN}" upgrade --bump
 }
 
+install_serena() {
+  log "Serenaを導入する"
+  bash "${ROOT_DIR}/scripts/install-serena.sh"
+}
+
 refresh_sheldon() {
   if ! command -v sheldon >/dev/null 2>&1; then
     log "sheldon が無いためプラグイン更新をスキップする"
@@ -68,6 +73,7 @@ main() {
   activate_mise
   upgrade_mise
   refresh_sheldon
+  install_serena
 
   log "完了。新しいターミナルを開くか exec zsh する"
   log "${MISE_CONFIG} が書き換わっている場合がある"

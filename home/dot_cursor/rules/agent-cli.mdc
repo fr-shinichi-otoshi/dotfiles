@@ -1,0 +1,367 @@
+---
+description: miseで管理する導入済みCLIの用途と利用方針
+alwaysApply: true
+---
+
+# 導入済みCLIの利用方針
+
+mise管理のCLIを、同じ役割のapt導入より先に使う。必要なものだけ選び、長い出力は絞ってから読む。
+
+## 基本方針
+
+1. 非対話コマンドを優先する。入力待ちのTUIはユーザー依頼時のみ。
+2. 似た役割は用途で分ける（早見表を先に見る）。
+3. 秘密情報・復号結果はチャットやログに出さない。
+4. 認証・鍵・デーモン・プロジェクト設定が要るものは、条件を確認してから使う。
+5. 無いからといって同種ツールを新規導入する前に、この一覧と `mise` を当たる。
+
+## タスク早見表
+
+| やりたいこと                   | 使うもの                         | 使わない／注意                     |
+| ------------------------------ | -------------------------------- | ---------------------------------- |
+| ファイル名で探す               | `fd`                             | `find` を新規に頼らない            |
+| テキストで中身を探す           | `rg`                             | ソース以外のPDF等は `rga`          |
+| 構文パターンで探す・書き換える | `ast-grep` / `sg`                | 平文検索は `rg`                    |
+| JSONを絞る                     | `jq`                             | 長いJSONをそのまま読まない         |
+| YAMLを参照・更新               | `yq`（Mike Farah版）             | kislyuk/yq と混同しない            |
+| 未知リポジトリの規模把握       | `tokei`                          | 詳細設計の代替ではない             |
+| 浅いディレクトリ概観           | `eza --tree --level=N`           | 深い再帰一覧は避ける               |
+| 差分をAgentが解析              | `git --no-pager diff --no-color` | 人向け表示は `delta`               |
+| 構造としての差分理解           | `difft`                          | 行差分の見やすさは `delta`         |
+| GitHub操作                     | `gh`（要認証確認）               | —                                  |
+| Actions workflow検査           | `actionlint`                     | —                                  |
+| シークレット混入検査           | `gitleaks`                       | 依存脆弱性は `osv-scanner`         |
+| 依存の既知脆弱性               | `osv-scanner`                    | ネットワーク必要                   |
+| シェル検査／整形               | `shellcheck` / `shfmt`           | —                                  |
+| Python lint／整形              | `ruff`                           | プロジェクト公式手順があればそちら |
+| JS/TSの未使用洗い出し          | `knip`                           | 削除前に参照を確認                 |
+| HTTPでAPI確認                  | `xh`                             | —                                  |
+| 変更のたびにテスト等           | `watchexec`                      | 常駐は依頼時のみ・終わったら止める |
+| 外部LLMへリポジトリ要約        | `repomix`                        | Cursor索引やSerenaの代替ではない   |
+| コミットメッセージ検査         | `commitlint`                     | Node 必要                          |
+| Terraform検査                  | `tflint` / `terraform validate`  | `apply` は依頼範囲のみ             |
+| PNG軽量化／WebP化              | `oxipng` / `cwebp`               | —                                  |
+
+## 実行前チェック
+
+- 版の定義:
+  `~/.config/mise/config.toml`（プロジェクト固有のmise設定があればそちらを優先）
+- 有無の確認: `command -v <command>`。無ければ
+  `mise exec -- <command>`、それでも駄目なら設定済みなら `mise install`
+- mise自体が無いときは `~/.local/bin/mise`
+- 作業ディレクトリは対象プロジェクト直下。フラグ不明時は導入済みの `--help`
+
+一覧は利用候補であり、環境に全て揃っているとは限らない。
+
+---
+
+## 探す・概観する
+
+### rg（ripgrep）
+
+ソースや設定のテキストを高速検索する。`.gitignore`
+を尊重し、バイナリを飛ばす。`grep -r` の代わり。
+
+- ドキュメントサイト：https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md
+- 主な用途：シンボル名・エラー文言・設定キーの横断検索。`-t` / `-g`
+  で種類制限、`-C` 等で文脈
+- 例：`rg -n 'TODO|FIXME' src`、`rg -t ts 'useEffect\\('`
+
+### fd
+
+ファイル名・パス・種類で探す。中身は `rg`、名前は `fd`。
+
+- ドキュメントサイト：https://github.com/sharkdp/fd
+- 主な用途：拡張子列挙、設定ファイルの所在、一括処理の対象パス収集
+- 例：`fd -e ts`、`fd --type d`、`fd 'vite.config'`
+
+### rga（ripgrep-all）
+
+PDF・Office・一部アーカイブなど、通常のテキスト検索では扱いにくい中身を探す。対応形式と変換ツールに依存。miseツール名は
+`ripgrep-all`、コマンドは `rga`。ソースだけなら `rg`。
+
+- ドキュメントサイト：https://github.com/phiresky/ripgrep-all
+- 主な用途：仕様書・スライド・docx内の文言検索
+
+### ast-grep
+
+ASTに基づく検索・置換。コメントや文字列リテラルの誤検出を避けやすい。コマンドは
+`ast-grep` と `sg`。
+
+- ドキュメントサイト：https://ast-grep.github.io/guide/introduction
+- 主な用途：関数呼び出し・import等の構文パターン洗い出し、構造を保った一括修正
+- 例：`ast-grep run -p 'console.log($A)' -l ts`、`sg run -p 'foo($A)' -r 'bar($A)' -l py`
+
+### tokei
+
+言語別のファイル数・コード行などを集計する。規模と主言語の初回把握用。
+
+- ドキュメントサイト：https://github.com/XAMPPRocky/tokei
+- 主な用途：未知リポジトリの概観、調査スコープの見積もり
+- 例：`tokei`、`tokei -o json`、`tokei src`
+
+### eza
+
+`ls` 代替。浅いツリー表示向き。深すぎる再帰は出力過多になるので `--level`
+を付ける。
+
+- ドキュメントサイト：https://eza.rocks/
+- 主な用途：作業ディレクトリ確認、浅い構造把握
+- 例：`eza -la`、`eza --tree --level=2`、`eza -la --git`
+
+### repomix
+
+リポジトリをLLM向け1ファイルにパックする。Cursor索引やSerenaの代替ではない。ignoreと
+`--compress` で出力を抑える。秘密を含めない。
+
+- ドキュメントサイト：https://repomix.com/
+- 主な用途：外部モデルや別チャットへの要約付きコンテキスト受け渡し
+- 例：`repomix --compress -o -`、`repomix --include 'src/**' -o /tmp/repo.xml`
+
+## 構造化データを絞る
+
+### jq
+
+JSONの抽出・変換。長いJSONは全文を文脈に載せず、必要なフィールドだけ取る。
+
+- ドキュメントサイト：https://jqlang.org/manual/
+- 主な用途：`gh api` やHTTP応答の整形、`package.json` からの値取得
+- 例：`jq -r '.items[].name'`、`jq '.scripts' package.json`
+
+### yq
+
+YAML等の参照・更新。Mike Farah版（Go製）。Python製kislyuk/yqとは別物。
+
+- ドキュメントサイト：https://mikefarah.gitbook.io/yq
+- 主な用途：Actions・Compose・Kubernetes風YAMLのキー参照・更新
+- 例：`yq '.services[].image' compose.yaml`、`yq '.jobs' .github/workflows/*.yml`
+
+## 差分・Git・GitHub
+
+Agentの差分解析は `git --no-pager diff --no-color` を基本とする。
+
+### difft（difftastic）
+
+ASTベースの構造差分。整形や関数移動を行差分のノイズとして誤読しにくい。
+
+- ドキュメントサイト：https://difftastic.wilfred.me.uk/
+- 主な用途：リファクタ差分の理解、2ファイルの構文比較
+- 例：`difft a.rs b.rs`、`GIT_EXTERNAL_DIFF=difft git diff`
+
+### gh
+
+GitHub公式CLI。利用前に対象リポジトリと認証（`gh auth status` 等）を確認する。
+
+- ドキュメントサイト：https://cli.github.com/manual/
+- 主な用途：PR/Issue閲覧、差分・Actionsログ、API JSON（`jq` と併用）
+
+### lefthook
+
+Gitフック管理。プロジェクトに設定があるときだけ従う。無い設定を勝手に追加しない。
+
+- ドキュメントサイト：https://lefthook.dev/
+- 主な用途：既存フックの実行確認、コミット前チェック内容の把握
+
+### commitlint
+
+コミットメッセージ検査。Node.js必須。プロジェクト設定があればそれに従い、lefthookのcommit-msgがあればその流れを優先。
+
+- ドキュメントサイト：https://commitlint.js.org/
+- 主な用途：Conventional Commits適合の確認。設定が無ければ `--default-config`
+- 例：`echo 'feat: add login' | commitlint --default-config`
+
+## 静的検査・整形・計測・セキュリティ
+
+### actionlint
+
+GitHub Actions workflowの静的検査。workflow変更後に実行する。
+
+- ドキュメントサイト：https://github.com/rhysd/actionlint
+- 主な用途：式・ジョブ依存・シェル部分の誤り検出
+- 例：`actionlint`、`actionlint -format '{{json .}}'`
+
+### gitleaks
+
+作業ツリーや履歴からシークレット混入を検出。`osv-scanner`
+とは別。ヒット内容をチャットに貼らない。
+
+- ドキュメントサイト：https://github.com/gitleaks/gitleaks
+- 主な用途：PR前や秘密を触った変更後の漏洩確認
+- 例：`gitleaks detect -s . -f json -r -`、`gitleaks detect --no-git -s .`
+
+### osv-scanner
+
+ロックファイル等から依存の既知脆弱性を調べる。ネットワーク必要。
+
+- ドキュメントサイト：https://google.github.io/osv-scanner/
+- 主な用途：依存追加・更新後の確認
+- 例：`osv-scanner scan source -r .`
+
+### shellcheck
+
+Bash/shの静的検査。スクリプトを書いた・直したら実行し、指摘を直してから走らせる。
+
+- ドキュメントサイト：https://www.shellcheck.net/
+- 主な用途：引用不足・誤った展開などの検出
+- 例：`shellcheck script.sh`
+
+### shfmt
+
+シェルの自動整形。miseツール名は `sh`、コマンドは `shfmt`。
+
+- ドキュメントサイト：https://github.com/mvdan/sh
+- 主な用途：インデント揃え。差分は `-d`、書き戻しは `-w`
+- 例：`shfmt -d`、`shfmt -w script.sh`
+
+### ruff
+
+Pythonのlintと整形。プロジェクトに別公式手順があればそちら優先。
+
+- ドキュメントサイト：https://docs.astral.sh/ruff/
+- 主な用途：問題検出、未使用import整理、フォーマット
+- 例：`ruff check`、`ruff format`、`ruff check --fix`
+
+### knip
+
+JS/TSの未使用ファイル・export・依存の検出。Node必要。結果は削除候補なので参照を確認してから消す。
+
+- ドキュメントサイト：https://knip.dev/
+- 主な用途：リファクタ後のデッドコード・余分な依存の洗い出し
+
+### hyperfine
+
+コマンド実行時間の繰り返し計測。
+
+- ドキュメントサイト：https://github.com/sharkdp/hyperfine
+- 主な用途：最適化前後や代替実装の数値比較
+- 例：`hyperfine 'cmd-before' 'cmd-after'`
+
+## HTTP・監視
+
+### xh
+
+短いフラグのHTTPクライアント。JSON向き。対話UIなし。
+
+- ドキュメントサイト：https://github.com/ducaale/xh
+- 主な用途：API疎通、ローカルサーバへのリクエスト
+- 例：`xh get https://httpbin.org/json`、`xh post :8080/api name=test -j`
+
+### watchexec
+
+ファイル変更でコマンド再実行。長時間常駐は依頼時のみ、終わったら止める。
+
+- ドキュメントサイト：https://watchexec.github.io/
+- 主な用途：保存のたびにテスト／ビルド／生成
+- 例：`watchexec -e rs -- cargo test`、`watchexec -c -r -- npm test`
+
+## ランタイムとパッケージ
+
+### node
+
+JS/TSランタイム。エンジン指定とmiseのnode版に従う。パッケージマネージャとロックファイルは既存方針を尊重し、無断で切り替えない。
+
+- ドキュメントサイト：https://nodejs.org/docs/latest/api/
+- 主な用途：開発サーバ、ビルド・テスト、npm系CLI
+
+### uv
+
+Python本体・venv・依存・Python製CLI。`uv`
+導入とプロジェクトのPython版は別。非uvプロジェクトを無断でuv化しない。Serena等の
+`uv tool` 前提にもなる。
+
+- ドキュメントサイト：https://docs.astral.sh/uv/
+- 主な用途：`uv sync` / `uv run`、`uv tool install`
+- 例：`uv run pytest`、`uv sync`
+
+## Terraform / IaC
+
+### terraform
+
+インフラの定義・変更。手順は `fmt` → `validate` → `plan`。`apply` / `destroy`
+は依頼範囲のみ。
+
+- ドキュメントサイト：https://developer.hashicorp.com/terraform/docs
+- 主な用途：整形・検証・実行計画の確認
+
+### tflint
+
+Terraformの静的検査。`.tflint.hcl` やプラグイン設定に従う。
+
+- ドキュメントサイト：https://github.com/terraform-linters/tflint
+- 主な用途：変更後リント、PR前確認
+
+### terraform-docs
+
+モジュールからドキュメント生成。出力形式はプロジェクトの既存フローに従う。
+
+- ドキュメントサイト：https://terraform-docs.io/
+- 主な用途：モジュールREADMEの更新・生成
+
+## 暗号化
+
+復号した平文はチャット・ログ・Gitに出さない。鍵素材も置かない。
+
+### sops
+
+YAML/JSON/env等の秘密を暗号化管理。プロジェクト設定と利用可能な鍵に従う。
+
+- ドキュメントサイト：https://getsops.io/
+- 主な用途：暗号化シークレットの参照・更新（権限があるときだけ）
+
+### age
+
+ファイル単位の暗号化・復号。SOPSの裏側でも使われる。recipient／鍵は既存運用に従う。
+
+- ドキュメントサイト：https://age-encryption.org/
+- 主な用途：単体ファイル暗号化、SOPS連携時の鍵まわり
+
+## 画像
+
+### oxipng
+
+PNGの可逆最適化。損失圧縮が必要なら別手段。
+
+- ドキュメントサイト：https://github.com/oxipng/oxipng
+- 主な用途：PNGアセットの軽量化
+- 例：`oxipng image.png`、`oxipng --out out.png image.png`
+
+### cwebp
+
+JPEG/PNG等からWebPへ。miseツール名は `libwebp`（`http:libwebp`）、コマンドは
+`cwebp`。
+
+- ドキュメントサイト：https://developers.google.com/speed/webp/docs/cwebp
+- 主な用途：Web向けWebP変換
+- 例：`cwebp -q 80 input.png -o output.webp`
+
+---
+
+## 対話型・ユーザー向け（Agentの自動実行では使わない）
+
+入力待ちになるか、人の確認用。ユーザーに操作やレビューを委ねるときだけ触る。代替があるものは括弧内を使う。
+
+| コマンド     | 役割                   | Agent側の代替                    |
+| ------------ | ---------------------- | -------------------------------- |
+| `fzf`        | あいまい選択           | 候補をコマンドで列挙して選ぶ     |
+| `broot`      | 対話的ツリー探索       | `eza --tree` / `fd`              |
+| `delta`      | 人向け差分表示         | `git --no-pager diff --no-color` |
+| `lazygit`    | Git TUI                | 通常の `git`                     |
+| `hunk`       | 差分レビュー画面       | `git diff` / `gh pr diff`        |
+| `lazydocker` | Docker TUI             | `docker` / `docker compose`      |
+| `gping`      | pingグラフ             | 必要なら非対話の `ping`          |
+| `herdr`      | マルチペイン作業環境   | Cursorの通常作業では起動不要     |
+| `atuin`      | シェル履歴の検索・同期 | 履歴源にしない                   |
+| `starship`   | プロンプト表示         | 明示起動しない                   |
+
+詳細ドキュメント:
+
+- fzf: https://github.com/junegunn/fzf
+- broot: https://dystroy.org/broot/
+- delta: https://dandavison.github.io/delta/
+- lazygit: https://github.com/jesseduffield/lazygit
+- hunk: https://github.com/modem-dev/hunk
+- lazydocker: https://github.com/jesseduffield/lazydocker
+- gping: https://github.com/orf/gping
+- herdr: https://github.com/herdrdev/herdr
+- atuin: https://docs.atuin.sh/
+- starship: https://starship.rs/

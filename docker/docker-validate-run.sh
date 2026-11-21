@@ -22,6 +22,10 @@ test -f "${HOME}/.vimrc"
 test -f "${HOME}/.gitconfig"
 test -f "${HOME}/.gitignore_global"
 test -f "${HOME}/.cursor/rules/installed-tools.mdc"
+test -f "${HOME}/.cursor/rules/agent-cli.mdc"
+test -f "${HOME}/.cursor/rules/serena.mdc"
+test -e "${HOME}/.claude/rules/agent-cli.md"
+test -e "${HOME}/.claude/rules/serena.md"
 test "$(git config --global --get user.name)" = "Docker Validator"
 test "$(git config --global --get user.email)" = "docker-validator@example.com"
 echo mise_config_ok
@@ -74,6 +78,19 @@ ruff --version
 knip --version
 osv-scanner --version
 hyperfine --version
+gitui --version
+difft --version
+actionlint --version
+gitleaks version
+commitlint --version
+rustc --version
+tokei --version
+xh --version
+watchexec --version
+oxipng --version
+cwebp -version
+repomix --version
+serena --version
 docker --version
 vim --version | head -n 1
 sudo docker version

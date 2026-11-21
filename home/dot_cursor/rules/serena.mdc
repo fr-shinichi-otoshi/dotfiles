@@ -1,0 +1,36 @@
+---
+description: Serena MCP（シンボル単位のコード探索・編集）の利用方針
+alwaysApply: true
+---
+
+# Serena MCP 利用方針
+
+Serena は Cursor に接続した MCP サーバーで、LSP 経由のシンボル検索・参照・編集を提供する。
+導入は `uv tool install`（`scripts/install-serena.sh`）。起動は
+`~/.cursor/mcp.json` の
+`serena start-mcp-server --context ide`。
+
+セッション開始時にプロジェクトが未アクティブなら、Serena でカレント／ワークスペースを
+activate してから使う。
+
+## 使う場面
+
+- コードベース全体の構造理解
+- シンボル間の参照関係の調査
+- クラス・関数・変数の定義や使用箇所の特定
+- ファイル間の依存関係の分析
+- 大規模リファクタリングの影響範囲調査
+- 設計パターンの実装箇所の探索
+- バグ原因となりうる関連コードの特定
+
+## 使わない場面
+
+- 単純なファイル読み込み・編集（Cursor 標準の Read / Edit で足りるとき）
+- 既知パスへの直接的な変更
+- 単純な文字列検索（`rg` で足りるとき）
+
+## 補足
+
+- ドキュメント: https://oraios.github.io/serena/
+- シェル調査用の `rg` / `ast-grep` などと併用してよい。意味的なナビは Serena、
+  テキスト／構文の一括検索は導入済み CLI を優先する。

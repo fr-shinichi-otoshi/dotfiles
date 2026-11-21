@@ -211,6 +211,62 @@ aptなどで追加する前に利用する。
   例: `hyperfine --warmup 3 'rg TODO src'`
   計測対象のコマンドに、ファイル変更や外部への送信を含めない。
 
+## 差分・検査・監視・画像
+
+- `gitui`
+  Gitのステージングやコミットを行う対話画面。
+  ユーザーによる対話操作に使う。Agentの自動実行では通常のgitコマンドを使う。
+
+- `difft`
+  構文に基づいて差分を表示する。miseのツール名は `aqua:Wilfred/difftastic`。
+  例: `difft a.rs b.rs`
+
+- `actionlint`
+  GitHub Actionsのworkflowを静的に検査する。
+  `.github/workflows` があるディレクトリで `actionlint` を実行する。
+
+- `gitleaks`
+  作業ツリーやGit履歴から秘密情報の混入を検出する。
+  例: `gitleaks detect --no-banner`
+  検出内容をチャット、ログ、Gitへ露出させない。
+
+- `commitlint`
+  コミットメッセージがConventional Commitsに沿っているか検査する。
+  miseのツール名は `npm:@commitlint/cli`、実行コマンドは `commitlint`。
+  プロジェクトに設定が無いときは `--default-config` を使う。
+
+- `tokei`
+  言語ごとのファイル数とコード行数を集計する。
+  miseのツール名は `cargo:tokei`。ビルドには同じ設定の `rust` と `build-essential` が必要。
+  例: `tokei`
+
+- `xh`
+  HTTPリクエストを送る。JSONの確認に使う。
+  例: `xh get https://httpbin.org/json`
+
+- `watchexec`
+  ファイル変更でコマンドを再実行する。
+  常駐させるのは依頼されたときだけにし、終わったら止める。
+  例: `watchexec --exts rs -- cargo test`
+
+- `oxipng`
+  PNGを可逆圧縮する。
+  例: `oxipng image.png`
+
+- `cwebp`
+  画像をWebPへ変換する。miseのツール名は `http:libwebp`、実行コマンドは `cwebp`。
+  例: `cwebp -q 80 input.png -o output.webp`
+
+- `repomix`
+  リポジトリをLLMへ渡す1ファイルにまとめる。
+  miseのツール名は `npm:repomix`、実行コマンドは `repomix`。
+  秘密情報を出力に含めない。
+
+- `serena`
+  シンボル単位のコード探索を行うMCPサーバー。
+  導入は `scripts/install-serena.sh`（miseのuvで `serena-agent` を入れる）。
+  大規模な定義・参照の調査に使う。単純な文字列検索は `rg` を使う。
+
 ## ツールの選び方
 
 - インストール済みという理由だけで、すべてのツールを使用しない。

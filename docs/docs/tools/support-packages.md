@@ -18,10 +18,13 @@ title: 補助パッケージ
 - `poppler-utils`はPDFをテキストにします。[ripgrep-all](ripgrep-all.md)が使います。
 - `pandoc`は文書形式の変換です。ripgrep-allがOffice文書などに使います。
 - `libatomic1`は共有ライブラリです。[Node.js](node.md)の公式バイナリが要求します。
+- `build-essential`はCコンパイラとリンカです。[tokei](tokei.md)のビルドで使います。
 
 ## 関連
 
 - [mitamae](mitamae.md)
 - [ripgrep-all](ripgrep-all.md)
 - [Node.js](node.md)
+- [tokei](tokei.md)
+- [Rust](rust.md)
 - [Vim](vim.md)

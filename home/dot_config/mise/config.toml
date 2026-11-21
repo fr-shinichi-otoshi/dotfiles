@@ -50,3 +50,38 @@ ruff = "0.17.5"
 "npm:knip" = "6.45.1"
 osv-scanner = "2.7.1"
 hyperfine = "2.0.0"
+
+# 追加 CLI（プレビルド。短い名前は cargo / go のソースビルドに落ちることがある）
+"aqua:gitui-org/gitui" = "0.28.1"
+"aqua:Wilfred/difftastic" = "0.72.0"
+"aqua:ducaale/xh" = "0.26.3"
+"aqua:rhysd/actionlint" = "1.7.12"
+"aqua:gitleaks/gitleaks" = "8.30.1"
+"aqua:watchexec/watchexec" = "2.8.0"
+"aqua:oxipng/oxipng" = "10.2.1"
+
+# tokei はプレビルドが無い。rust を先に入れ、cargo でビルドする。
+rust = "stable"
+
+# GitHub Release に単体バイナリが無い npm パッケージ。実行は上の node。
+"npm:@commitlint/cli" = "21.2.4"
+"npm:repomix" = "1.19.0"
+
+[tools."cargo:tokei"]
+version = "15.0.0"
+depends = ["rust"]
+
+# cwebp。aqua / GitHub Release に無いため公式プレビルドを使う。
+# https://developers.google.com/speed/webp/docs/precompiled
+[tools."http:libwebp"]
+version = "1.6.0"
+strip_components = 1
+bin_path = "bin"
+version_list_url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html"
+version_regex = 'libwebp-(\d+\.\d+\.\d+)-linux-x86-64\.tar\.gz'
+
+[tools."http:libwebp".platforms]
+linux-x64 = { url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-{{ version }}-linux-x86-64.tar.gz" }
+linux-arm64 = { url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-{{ version }}-linux-aarch64.tar.gz" }
+macos-x64 = { url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-{{ version }}-mac-x86-64.tar.gz" }
+macos-arm64 = { url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-{{ version }}-mac-arm64.tar.gz" }

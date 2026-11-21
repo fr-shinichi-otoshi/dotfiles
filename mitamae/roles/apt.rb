@@ -14,6 +14,7 @@ end
   poppler-utils
   pandoc
   libatomic1
+  build-essential
 ].each do |name|
   package name do
     action :install

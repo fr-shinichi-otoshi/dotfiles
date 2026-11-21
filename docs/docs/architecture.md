@@ -36,13 +36,13 @@
 
 ## 導入のレイヤ
 
-| 層                     | 役割                     | 主な対象                                             |
-| ---------------------- | ------------------------ | ---------------------------------------------------- |
-| snap / chezmoi         | 設定配布の入口           | chezmoi導入、`init` / `apply`                        |
-| `scripts/bootstrap.sh` | プロビジョニング入口     | mitamae取得、レシピ実行、mise再install、sheldon lock |
-| `scripts/update.sh`    | 日常更新入口             | apt更新、mise版バンプ、sheldon更新                   |
-| mitamae                | マシンのプロビジョニング | apt、Docker Engine、mise導入、bashrc PATH、chsh→zsh  |
-| mise                   | CLI / ランタイムの版管理 | シェル系、Git系、node / terraform、herdr / hunk など |
+| 層                     | 役割                     | 主な対象                                                     |
+| ---------------------- | ------------------------ | ------------------------------------------------------------ |
+| snap / chezmoi         | 設定配布の入口           | chezmoi導入、`init` / `apply`                                |
+| `scripts/bootstrap.sh` | プロビジョニング入口     | mitamae取得、レシピ実行、mise再install、sheldon lock、Serena |
+| `scripts/update.sh`    | 日常更新入口             | apt更新、mise版バンプ、sheldon更新、Serena                   |
+| mitamae                | マシンのプロビジョニング | apt、Docker Engine、mise導入、bashrc PATH、chsh→zsh          |
+| mise                   | CLI / ランタイムの版管理 | シェル系、Git系、node / terraform、herdr / hunk など         |
 
 ### 導入するツール
 
@@ -53,6 +53,7 @@
 | vim                    | apt（mitamae）               | ディストリビューション提供。設定はchezmoiの`.vimrc` |
 | poppler-utils / pandoc | apt（mitamae）               | ripgrep-all用                                       |
 | libatomic1             | apt（mitamae）               | Node.js公式バイナリが要求する共有ライブラリ         |
+| build-essential        | apt（mitamae）               | tokeiのビルドに使うリンカ                           |
 | chezmoi                | snap（`--classic`）          | snapチャネルの版                                    |
 | mitamae                | GitHub Releases（bootstrap） | 2.0.6                                               |
 | mise                   | 公式インストーラ（mitamae）  | インストーラが入れる版                              |
@@ -63,12 +64,13 @@ miseで入れる主なCLIは次のとおりです。
 
 - 既存: `gh`/`sops`/`age`
 - シェル: `fzf`/`ripgrep`/`fd`/`eza`/`sheldon`/`starship`/`atuin`
-- Git: `lazygit`/`lefthook`/`delta`（`gitui`は入れません）
-- ランタイム: `node`/`uv`/`terraform`/`tflint`/`terraform-docs`
+- Git: `lazygit`/`lefthook`/`delta`/`gitui`/`difft`/`actionlint`/`gitleaks`/`commitlint`
+- ランタイム: `node`/`uv`/`rust`/`terraform`/`tflint`/`terraform-docs`
 - 追加: `broot`/`gping`/`ripgrep-all`/`lazydocker`
-- エージェント／レビュー: `herdr`/`hunk`
-- 構造化データ／構文検索: `jq`/`yq`（Mike Farah版）/`ast-grep`
+- エージェント／レビュー: `herdr`/`hunk`/`repomix`。Serenaは`scripts/install-serena.sh`
+- 構造化データ／構文検索: `jq`/`yq`（Mike Farah版）/`ast-grep`/`tokei`
 - 検査／計測: `shellcheck`/`shfmt`/`ruff`/`npm:knip`/`osv-scanner`/`hyperfine`
+- ネットワーク／画像: `xh`/`watchexec`/`oxipng`/`cwebp`
 
 役割と設定場所は[導入するツール](tools/index.md)です。CLIの版はリポジトリの`home/dot_config/mise/config.toml`が正です。chezmoiとDocker Engineはmiseでは管理しません。
 
@@ -92,7 +94,8 @@ dotfiles/
 ├── README.md
 ├── scripts/                  # 利用者向け入口
 │   ├── bootstrap.sh          # プロビジョニングの入口
-│   └── update.sh             # 日常更新（apt / mise / sheldon）
+│   ├── update.sh             # 日常更新（apt / mise / sheldon / Serena）
+│   └── install-serena.sh     # Serena MCP（uv tool）
 ├── docker/                   # 整備者向け Docker 検証
 │   └── docker-validate*.sh
 ├── .chezmoiroot              # 内容をhomeとし、管理対象のルートを指定
@@ -104,7 +107,8 @@ dotfiles/
 │   ├── dot_vimrc
 │   ├── dot_gitconfig.tmpl / dot_gitignore_global
 │   ├── dot_config/{mise,sheldon,starship,atuin}/
-│   └── dot_cursor/rules/installed-tools.mdc
+│   ├── dot_cursor/rules/     # installed-tools / agent-cli / serena
+│   └── dot_claude/rules/     # 上記ルールへのシンボリックリンク
 ├── docs/
 └── templates/                # プロジェクト用のひな形（今後）
 ```
@@ -119,7 +123,7 @@ dotfiles/
 - **実行ユーザー**：sudoを実行できる一般ユーザー。
 - **前提**：snapでchezmoiを導入し、このリポジトリをsourceにして`chezmoi apply`済みであること。
 - **入口**：リポジトリ直下で`bash scripts/bootstrap.sh`を実行します。
-- **担当する処理**：mitamaeの取得、レシピ実行、miseの再install、sheldon lock。
+- **担当する処理**：mitamaeの取得、レシピ実行、miseの再install、sheldon lock、Serenaの導入。
 - **担当しない処理**：chezmoiのinstall/init/apply。日常更新は`scripts/update.sh`。
 - **再実行**：導入済みのツールを考慮して処理します。
 - **SSH認証**：鍵の生成・GitHubへの登録は利用者が初回導入時に行い、`scripts/bootstrap.sh`では扱いません。
@@ -129,7 +133,7 @@ dotfiles/
 - **実行ユーザー**：sudoを実行できる一般ユーザー。
 - **前提**：getting-startedと`scripts/bootstrap.sh`が完了していること。
 - **入口**：リポジトリ直下で`bash scripts/update.sh`を実行します。
-- **担当する処理**：aptの`update`/`upgrade`、`mise upgrade --bump`、sheldon lock。
+- **担当する処理**：aptの`update`/`upgrade`、`mise upgrade --bump`、sheldon lock、Serenaの再導入。Serenaの版は`scripts/install-serena.sh`です。
 - **担当しない処理**：chezmoiのinstall/init/apply、mitamae、`scripts/bootstrap.sh`。
 - **版の扱い**：`--bump`は`~/.config/mise/config.toml`を書き換えることがあります。共有する版の正はリポジトリの`home/dot_config/mise/config.toml`です。取り込み手順は[設定の変更手順](maintenance.md#cliの版を上げて共有する)です。
 
@@ -140,12 +144,12 @@ dotfiles/
 | 導入手順             | 記載済み。整備者検証はDockerのみ                            |
 | chezmoi（snap）      | 手順化済み（bootstrap外）。Docker検証ではバイナリ同梱で代替 |
 | scripts/bootstrap.sh | 実装済み（プロビジョニング専用）                            |
-| scripts/update.sh    | 実装済み（apt / mise bump / sheldon）                       |
+| scripts/update.sh    | 実装済み（apt / mise bump / sheldon / Serena）              |
 | mitamaeレシピ        | 実装済み（apt / Docker / mise / PATH / zsh）                |
 | miseツール定義       | 実装済み（シェル・Git・ランタイム・解析・検査を含む）       |
 | chezmoiシェル設定    | 実装済み（zsh / sheldon / starship / atuin）                |
 | chezmoi Vim設定      | 実装済み（`.vimrc` + vim-plug 自動導入）                    |
-| chezmoi Cursor設定   | 実装済み（`~/.cursor/rules/installed-tools.mdc`のみ）       |
+| chezmoi Cursor設定   | 実装済み（Cursorルール3ファイルとClaude向けリンク）         |
 | 共通アプリ設定       | Git設定テンプレート実装済み（署名・鍵運用は未整備）         |
 | Docker検証・自動化   | 検証の正。手順あり（変更後は再実行して確認）                |
 | WSL／Ubuntu実機検証  | 対象外（余力のある実機がない）                              |
